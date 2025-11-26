@@ -1,0 +1,99 @@
+---
+title: "Assessment 2 GY476"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+Loading relivent packages, and setting up work directories
+
+```{r}
+#add your relivent work directory
+wdir <-"/Users/dylanhillier/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/GY476_Geographic_Information_System/assessment02"
+
+#load packages that we might need
+if(!require("tidyverse")){
+    install.packages("tidyverse")
+}
+library("tidyverse")
+library(ggplot2)
+library(sf)
+
+#Creating a data directory to store raw data along with setting work directory
+if(!dir.exists(file.path(wdir, "data"))){
+    dir.create(file.path(wdir, "data"))
+}
+ddir <- file.path(wdir, "data")
+
+
+```
+
+#Loading airbnb data We now need to load airbnb data using the download.file function
+
+```{r}
+
+download.file(url = "https://data.insideairbnb.com/united-states/ca/los-angeles/2025-09-01/visualisations/listings.csv", destfile = file.path(ddir, "listing.csv"))
+
+download.file(url = "https://data.insideairbnb.com/united-states/ca/los-angeles/2025-09-01/visualisations/neighbourhoods.geojson", destfile = file.path(ddir, "neighbourhoods.geojon" ) )
+
+
+
+```
+
+```{r}
+los_angeles.raw.bnb <- read.csv(file = file.path(ddir, "listing.csv")) #data for airbnb points
+
+los_angeles.neighbourhoodsgeom.bnb <- st_read(file.path(ddir, "neighbourhoods.geojon"))  #shapefile for neighbourhood
+
+los_angeles.tibble.bnb <- tibble(los_angeles.raw.bnb) #turning into tibble 
+
+los_angeles.geom <- st_read(file.path(ddir, "LA_geometry.gpkg")) #shapefile for los angeles linking to census data
+
+los_angeles.census2019_2023.raw <- read.csv(file.path(ddir, "ACS_2019_2023_LA_vars.csv" )) #census data
+
+los_angeles.census2019_2023.tibble <- tibble(los_angeles.census2019_2023.raw) %>%   #census data as tibble
+  mutate(GEOID = as.character(GEOID)) %>%
+  mutate(GEOID = paste0("06", str_sub(GEOID, start = 2)))
+```
+
+Joining my census data, with census shapefile
+
+```{r}
+#joining los_angeles geom with census data
+los_angeles.joined <- los_angeles.geom %>%
+  left_join(los_angeles.census2019_2023.tibble, by = "GEOID")
+#joining csv with nighbourhoods data 
+
+```
+
+Mapping all of the airbnb listings in los angeles adjusting for outliers
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(sf)
+library(tmap)
+
+results <- read.csv(file = file.path(ddir, "listing.csv")) %>%
+  tibble()
+Q1 <- quantile(results$price, 0.25, na.rm = TRUE)
+Q3 <- quantile(results$price, 0.75, na.rm = TRUE)
+IQR <- Q3 - Q1
+
+airbnb_df <- results %>%
+  filter(price >= (Q1 - 1.5 * IQR) & 
+         price <= (Q3 + 1.5 * IQR)) %>%
+  st_as_sf(coords = c("longitude", "latitude")) %>%
+  st_set_crs(4326)
+
+
+tmap_mode("view")
+
+tm_shape(airbnb_df) +
+  tm_dots(fill = "price",           # Use 'fill' instead of 'col' in v4
+          fill.scale = tm_scale_continuous(values = "Reds"),  # Color palette
+          fill.legend = tm_legend(title = "Price"),
+          size = 0.5)
+
+
+```
