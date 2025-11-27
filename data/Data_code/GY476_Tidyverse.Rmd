@@ -26,7 +26,7 @@ The first step to start working with Tidycensus is to request a Census API key.
 
 
 ```{r tidycensus, include=FALSE}
-#census_api_key("XXXXXXXXXXXXXXXXXXXXXXXXXXX", install = TRUE) # Substitute the XXXXXX string for your own Census API key
+census_api_key("c990ed72472399dd626592b06afee9a188d03320", install = TRUE) # Substitute the XXXXXX string for your own Census API key
 ```
 
 
