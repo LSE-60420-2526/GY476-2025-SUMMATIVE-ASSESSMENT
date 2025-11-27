@@ -5,11 +5,7 @@ output:
   pdf_document: default
 ---
 
-
-
 # SETUP: Load packages and set directories
-
-
 
 ```{r setup}
 # Set working directory
@@ -30,10 +26,7 @@ if(!dir.exists(file.path(wdir, "data"))) {
 ddir <- file.path(wdir, "data")
 ```
 
-
 # DOWNLOAD DATA: Airbnb listings and neighbourhood boundaries
-
-
 
 ```{r download-data}
 # Download Airbnb listings
@@ -49,11 +42,7 @@ download.file(
 )
 ```
 
-
-
 # LOAD DATA: Read in all datasets
-
-
 
 ```{r load-data}
 # Airbnb listings
@@ -74,11 +63,7 @@ census_data <- read.csv(file.path(ddir, "ACS_2019_2023_LA_vars.csv")) %>%
   )
 ```
 
-
-
 # JOIN DATA: Combine census geometry with census data
-
-
 
 ```{r join-census}
 census_joined <- census_tracts_sf %>%
@@ -108,11 +93,7 @@ airbnb_sf <- airbnb_raw %>%
   st_set_crs(4326)
 ```
 
-
-
 # MAP 1: Interactive map of all Airbnb listings
-
-
 
 ```{r map-interactive}
 tmap_mode("view")
@@ -126,11 +107,7 @@ tm_shape(airbnb_sf) +
   )
 ```
 
-
-
 # MAP 2: Static map of listings with neighbourhood boundaries
-
-
 
 ```{r map-listings}
 tmap_mode("plot")
@@ -169,11 +146,7 @@ tmap_save(
 )
 ```
 
-
-
 # MAP 3: Choropleth of mean price by neighbourhood
-
-
 
 ```{r map-choropleth}
 # Fix invalid geometries
