@@ -364,3 +364,12 @@ popViewport()
 
 dev.off()
 ```
+
+#figure 4
+
+```{R}
+library(ggplot2)
+airbnb_raw
+data_summary
+
+```
