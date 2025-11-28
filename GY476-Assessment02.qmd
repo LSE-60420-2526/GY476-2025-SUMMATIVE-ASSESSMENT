@@ -270,55 +270,38 @@ dev.off()
 ```
 
 # =============================================================================
-# FIGURE 3: Socio-economic Variables (Two-panel: Renters and Median Income)
+# FIGURE 3: Socio-economic Variables (Combined Panel)
 # =============================================================================
-```{r figure-3-data}
-# Get renter data from tidycensus
-renter_data <- get_acs(
-  state = "CA",
-  county = "Los Angeles",
-  geography = "tract",
-  variables = c(total_units = "B25003_001", renter_occupied = "B25003_003"),
-  geometry = TRUE,
-  year = 2023,
-  output = "wide"
-) %>% 
-  tibble() %>%
-  mutate(pct_renter = (renter_occupiedE / total_unitsE) * 100) %>%
-  select(GEOID, pct_renter)
 
-# Join renter data to census tracts
-renter_sf <- census_tracts_sf %>%
-  left_join(renter_data, by = "GEOID") %>%
-  st_make_valid() %>%
-  st_transform(crs = 32611)
+# ---- 1. Data Preparation ----
+# (Your existing code correctly standardizes renters by total units) 
+# =============================================================================
+# FIGURE 3: Socio-economic Variables (Combined Panel)
+# =============================================================================
 
-# Get median income from provided census data
-Median_income <- census_data %>% 
-  select(GEOID, Median_income = B19013_001E) %>%
-  filter(!is.na(Median_income)) 
-
-# Join median income to census tracts
-Median_income_sf <- census_tracts_sf %>%
-  left_join(Median_income, by = "GEOID") %>%
-  st_make_valid() %>%
-  st_transform(crs = 32611)
-```
-```{r figure-3a-renter}
-# ---- Figure 3a: Percentage of Renters ----
+# ... [Keep your data preparation code from step 1 exactly the same] ...
+```{r}
+# ---- 2. Define Map Objects ----
 tmap_mode("plot")
 
+# -- Panel A: Renters --
 main_renter <- tm_shape(renter_sf, bbox = mainland_bbox) +
   tm_polygons(
     fill = "pct_renter",
     fill.scale = tm_scale_continuous(values = "YlOrRd"),
-    fill.legend = tm_legend(title = "Percentage Renters (%)"),
-    col = "white", lwd = 0.3
+    # Orientation landscape works best for bottom legends
+    fill.legend = tm_legend(title = "Percentage Renters (%)", orientation = "landscape"), 
+    col = "white", lwd = 0.1
   ) +
-  tm_title("Percentage of Renters by Census Tract", fontface = "bold", size = 1.2) +
+  tm_title("A: Renter Occupancy", fontface = "bold", size = 1.2) +
   tm_compass(type = "arrow", position = c("right", "top"), size = 1.5) +
-  tm_scalebar(position = c("left", "bottom"), width = 15) +
-  tm_layout(frame = TRUE)
+  tm_scalebar(position = c("right", "bottom"), width = 10) +
+  # CHANGE: Move legend outside to the bottom
+  tm_layout(frame = TRUE, 
+            legend.outside = TRUE, 
+            legend.outside.position = "bottom",
+            legend.outside.size = 0.2,
+            inner.margins = c(0.02, 0.02, 0.02, 0.02))
 
 inset_renter <- tm_shape(renter_sf, bbox = catalina_bbox) +
   tm_polygons(
@@ -327,46 +310,57 @@ inset_renter <- tm_shape(renter_sf, bbox = catalina_bbox) +
     fill.legend = tm_legend(show = FALSE),
     col = "white", lwd = 0.3
   ) +
-  tm_title("Catalina Island", size = 0.7, fontface = "bold") +
-  tm_layout(frame = TRUE, frame.lwd = 2, bg.color = "white")
+  tm_title("Catalina Is.", size = 0.6, fontface = "bold") +
+  tm_layout(frame = TRUE, frame.lwd = 1, bg.color = "white")
 
-# Save Figure 3a
-png(file.path(ddir, "figure_3a_renter_map.png"), width = 10, height = 8, units = "in", res = 300)
-grid.newpage()
-print(main_renter, vp = viewport(x = 0.5, y = 0.5, width = 1, height = 1))
-print(inset_renter, vp = viewport(x = 0.815, y = 0.1325, width = 0.22, height = 0.28))
-dev.off()
-```
-```{r figure-3b-income}
-# ---- Figure 3b: Median Household Income ----
-tmap_mode("plot")
-
+# -- Panel B: Income --
 main_income <- tm_shape(Median_income_sf, bbox = mainland_bbox) +
   tm_polygons(
     fill = "Median_income",
-    fill.scale = tm_scale_continuous(values = "YlOrRd"),
-    fill.legend = tm_legend(title = "Median Household Income ($)"),
-    col = "white", lwd = 0.3
+    fill.scale = tm_scale_continuous(values = "GnBu"),
+    # Orientation landscape works best for bottom legends
+    fill.legend = tm_legend(title = "Median Income ($)", orientation = "landscape"),
+    col = "white", lwd = 0.1
   ) +
-  tm_title("Median Household Income in Los Angeles County", fontface = "bold", size = 1.2) +
+  tm_title("B: Median Household Income", fontface = "bold", size = 1.2) +
   tm_compass(type = "arrow", position = c("right", "top"), size = 1.5) +
-  tm_scalebar(position = c("left", "bottom"), width = 15) +
-  tm_layout(frame = TRUE)
+  tm_scalebar(position = c("right", "bottom"), width = 10) +
+  # CHANGE: Move legend outside to the bottom
+  tm_layout(frame = TRUE, 
+            legend.outside = TRUE, 
+            legend.outside.position = "bottom",
+            legend.outside.size = 0.2,
+            inner.margins = c(0.02, 0.02, 0.02, 0.02))
 
 inset_income <- tm_shape(Median_income_sf, bbox = catalina_bbox) +
   tm_polygons(
     fill = "Median_income",
-    fill.scale = tm_scale_continuous(values = "YlOrRd"),
+    fill.scale = tm_scale_continuous(values = "GnBu"),
     fill.legend = tm_legend(show = FALSE),
     col = "white", lwd = 0.3
   ) +
-  tm_title("Catalina Island", size = 0.7, fontface = "bold") +
-  tm_layout(frame = TRUE, frame.lwd = 2, bg.color = "white")
+  tm_title("Catalina Is.", size = 0.6, fontface = "bold") +
+  tm_layout(frame = TRUE, frame.lwd = 1, bg.color = "white")
 
-# Save Figure 3b
-png(file.path(ddir, "figure_3b_income_map.png"), width = 10, height = 8, units = "in", res = 300)
+# ---- 3. Render Combined Figure ----
+png(file.path(ddir, "figure_3_socioeconomic_combined.png"), width = 14, height = 9, units = "in", res = 300)
+
 grid.newpage()
-print(main_income, vp = viewport(x = 0.5, y = 0.5, width = 1, height = 1))
-print(inset_income, vp = viewport(x = 0.815, y = 0.1325, width = 0.22, height = 0.28))
+pushViewport(viewport(layout = grid.layout(1, 2)))
+
+# --- Left Column (Renters) ---
+pushViewport(viewport(layout.pos.col = 1))
+  print(main_renter, vp = viewport(x = 0.5, y = 0.5, width = 0.98, height = 0.98))
+  # Adjusted y position slightly to account for the layout change
+  print(inset_renter, vp = viewport(x = 0.78, y = 0.25, width = 0.22, height = 0.28))
+popViewport()
+
+# --- Right Column (Income) ---
+pushViewport(viewport(layout.pos.col = 2))
+  print(main_income, vp = viewport(x = 0.5, y = 0.5, width = 0.98, height = 0.98))
+  # Adjusted y position slightly to account for the layout change
+  print(inset_income, vp = viewport(x = 0.78, y = 0.25, width = 0.22, height = 0.28))
+popViewport()
+
 dev.off()
 ```
