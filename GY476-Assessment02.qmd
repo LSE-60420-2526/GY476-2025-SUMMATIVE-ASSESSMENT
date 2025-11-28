@@ -5,8 +5,9 @@ output:
   pdf_document: default
 ---
 
+# =============================================================================
 # SETUP: Load packages and set directories
-
+# =============================================================================
 ```{r setup}
 # Set working directory
 wdir <- "/Users/dylanhillier/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/GY476_Geographic_Information_System/assessment02"
@@ -18,16 +19,22 @@ library(ggplot2)
 library(dplyr)
 library(sf)
 library(tmap)
+library(tidycensus)
+library(grid)
 
 # Create data directory if it doesn't exist
 if(!dir.exists(file.path(wdir, "data"))) {
   dir.create(file.path(wdir, "data"))
 }
 ddir <- file.path(wdir, "data")
+
+# Census API key
+census_api_key("c990ed72472399dd626592b06afee9a188d03320", install = TRUE, overwrite = TRUE)
 ```
 
+# =============================================================================
 # DOWNLOAD DATA: Airbnb listings and neighbourhood boundaries
-
+# =============================================================================
 ```{r download-data}
 # Download Airbnb listings
 download.file(
@@ -42,8 +49,9 @@ download.file(
 )
 ```
 
+# =============================================================================
 # LOAD DATA: Read in all datasets
-
+# =============================================================================
 ```{r load-data}
 # Airbnb listings
 airbnb_raw <- read.csv(file.path(ddir, "listing.csv"))
@@ -54,7 +62,6 @@ neighbourhoods_sf <- st_read(file.path(ddir, "neighbourhoods.geojson"))
 # LA census tract geometry
 census_tracts_sf <- st_read(file.path(ddir, "LA_geometry.gpkg")) %>%
   st_transform(32611)
-  
 
 # Census data
 census_data <- read.csv(file.path(ddir, "ACS_2019_2023_LA_vars.csv")) %>%
@@ -63,20 +70,28 @@ census_data <- read.csv(file.path(ddir, "ACS_2019_2023_LA_vars.csv")) %>%
     GEOID = as.character(GEOID),
     GEOID = paste0("06", str_sub(GEOID, start = 2))
   )
+
+# Define bounding boxes (reused for all maps)
+mainland_bbox <- st_bbox(c(xmin = 320000, ymin = 3710000, 
+                           xmax = 445000, ymax = 3860000), 
+                         crs = 32611)
+
+catalina_bbox <- st_bbox(c(xmin = 340000, ymin = 3678000, 
+                           xmax = 390000, ymax = 3708000), 
+                         crs = 32611)
 ```
 
+# =============================================================================
 # JOIN DATA: Combine census geometry with census data
-
+# =============================================================================
 ```{r join-census}
 census_joined <- census_tracts_sf %>%
   left_join(census_data, by = "GEOID")
 ```
 
-
-
+# =============================================================================
 # PREPARE AIRBNB DATA: Remove outliers and convert to spatial
-
-
+# =============================================================================
 ```{r prepare-airbnb}
 # Calculate IQR bounds for outlier removal
 Q1 <- quantile(airbnb_raw$price, 0.25, na.rm = TRUE)
@@ -92,37 +107,14 @@ airbnb_sf <- airbnb_raw %>%
   ) %>%
   st_as_sf(coords = c("longitude", "latitude")) %>%
   st_set_crs(4326) %>%      
-  st_transform(32611) 
+  st_transform(32611) %>%
+  st_make_valid()
 ```
 
-
-
-# FIGURE 1: Airbnb Listings by Room Type
-
+# =============================================================================
+# FIGURE 1: Airbnb Listings by Room Type (Two-panel map)
+# =============================================================================
 ```{r figure-1}
-
-
-
-# First, let's find the actual extent of Catalina Island
-# Check the coordinates of Catalina listings
-catalina_points <- airbnb_sf %>%
-  filter(st_coordinates(.)[,2] < 3720000)  # Points south of mainland
-
-# Get the bounding box of Catalina points
-st_bbox(catalina_points)
-
-# Define bounding boxes based on actual data
-# Mainland LA (excluding Catalina)
-# More centred view
-mainland_bbox <- st_bbox(c(xmin = 320000, ymin = 3710000, 
-                           xmax = 445000, ymax = 3860000), 
-                         crs = 32611)
-
-# Catalina Island - adjusted coordinates
-catalina_bbox <- st_bbox(c(xmin = 350000, ymin = 3685000, 
-                           xmax = 385000, ymax = 3715000), 
-                         crs = 32611)
-
 # Split by room type
 airbnb_entire <- airbnb_sf %>%
   filter(room_type == "Entire home/apt")
@@ -130,130 +122,63 @@ airbnb_entire <- airbnb_sf %>%
 airbnb_other <- airbnb_sf %>%
   filter(room_type %in% c("Hotel room", "Private room", "Shared room"))
 
-# ---- MAP 1: Entire Home/Apartment ----
 tmap_mode("plot")
 
-# Main map (mainland)
+# ---- Panel 1: Entire Home/Apartment ----
 main_entire <- tm_shape(census_tracts_sf, bbox = mainland_bbox) +
   tm_borders(col = "grey70", lwd = 0.3) +
-tm_shape(airbnb_entire) +
-  tm_dots(fill = "darkblue",
-          size = 0.05,
-          fill_alpha = 0.5) +
-tm_title("Entire Home/Apartment", fontface = "bold", size = 1.2) +
-tm_scalebar(position = c("left", "bottom"), width = 15) +
-tm_compass(type = "arrow", position = c("right", "top"), size = 2.4) +
-tm_layout(frame = TRUE)
+  tm_shape(airbnb_entire) +
+  tm_dots(fill = "darkblue", size = 0.05, fill_alpha = 0.5) +
+  tm_title("Entire Home/Apartment", fontface = "bold", size = 1.2) +
+  tm_scalebar(position = c("left", "bottom"), width = 15) +
+  tm_compass(type = "arrow", position = c("right", "top"), size = 2.4) +
+  tm_layout(frame = TRUE)
 
-# Inset map (Catalina)
 inset_entire <- tm_shape(census_tracts_sf, bbox = catalina_bbox) +
   tm_fill(fill = "grey95") +
   tm_borders(col = "grey70", lwd = 0.5) +
-tm_shape(airbnb_entire) +
-  tm_dots(fill = "darkblue",
-          size = 0.2,
-          fill_alpha = 0.7) +
-tm_title("Catalina Island", size = 0.7, fontface = "bold") +
-tm_layout(frame = TRUE,
-          frame.lwd = 2,
-          bg.color = "white")
+  tm_shape(airbnb_entire) +
+  tm_dots(fill = "darkblue", size = 0.2, fill_alpha = 0.7) +
+  tm_title("Catalina Island", size = 0.7, fontface = "bold") +
+  tm_layout(frame = TRUE, frame.lwd = 2, bg.color = "white")
 
-# ---- MAP 2: Hotel/Private/Shared Room ----
-
-# Main map (mainland)
+# ---- Panel 2: Hotel/Private/Shared Room ----
 main_other <- tm_shape(census_tracts_sf, bbox = mainland_bbox) +
   tm_borders(col = "grey70", lwd = 0.3) +
-tm_shape(airbnb_other) +
-  tm_dots(fill = "darkred",
-          size = 0.05,
-          fill_alpha = 0.5) +
-tm_title("Hotel / Private / Shared Room", fontface = "bold", size = 1.2) +
-tm_scalebar(position = c("left", "bottom"), width = 15) +
-tm_compass(type = "arrow", position = c("right", "top"), size = 2.4) +
-tm_layout(frame = TRUE)
+  tm_shape(airbnb_other) +
+  tm_dots(fill = "darkred", size = 0.05, fill_alpha = 0.5) +
+  tm_title("Hotel / Private / Shared Room", fontface = "bold", size = 1.2) +
+  tm_scalebar(position = c("left", "bottom"), width = 15) +
+  tm_compass(type = "arrow", position = c("right", "top"), size = 2.4) +
+  tm_layout(frame = TRUE)
 
-# Inset map (Catalina)
 inset_other <- tm_shape(census_tracts_sf, bbox = catalina_bbox) +
   tm_fill(fill = "grey95") +
   tm_borders(col = "grey70", lwd = 0.5) +
-tm_shape(airbnb_other) +
-  tm_dots(fill = "darkred",
-          size = 0.2,
-          fill_alpha = 0.7) +
-tm_title("Catalina Island", size = 0.7, fontface = "bold") +
-tm_layout(frame = TRUE,
-          frame.lwd = 2,
-          bg.color = "white")
+  tm_shape(airbnb_other) +
+  tm_dots(fill = "darkred", size = 0.2, fill_alpha = 0.7) +
+  tm_title("Catalina Island", size = 0.7, fontface = "bold") +
+  tm_layout(frame = TRUE, frame.lwd = 2, bg.color = "white")
 
-
-# ---- Save with grid viewports ----
-library(grid)
-
-png(file.path(ddir, "figure_1_room_types.png"), 
-    width = 14, height = 8, units = "in", res = 300)
-
+# ---- Save Figure 1 ----
+png(file.path(ddir, "figure_1_room_types.png"), width = 14, height = 8, units = "in", res = 300)
 grid.newpage()
 pushViewport(viewport(layout = grid.layout(1, 2)))
-
-# Left panel
 pushViewport(viewport(layout.pos.col = 1))
 print(main_entire, vp = viewport(x = 0.5, y = 0.5, width = 0.95, height = 0.95))
 print(inset_entire, vp = viewport(x = 0.78, y = 0.17, width = 0.22, height = 0.28))
 popViewport()
-
-# Right panel
 pushViewport(viewport(layout.pos.col = 2))
 print(main_other, vp = viewport(x = 0.5, y = 0.5, width = 0.95, height = 0.95))
 print(inset_other, vp = viewport(x = 0.78, y = 0.17, width = 0.22, height = 0.28))
 popViewport()
-
 dev.off()
-
-
 ```
 
-# MAP 2: Static map of listings with neighbourhood boundaries
-
-```{r map-listings}
-tmap_mode("plot")
-
-map_listings <- tm_shape(neighbourhoods_sf) +
-  tm_polygons(
-    fill = "#f7f7f7",
-    col = "#969696",
-    lwd = 0.5,
-    fill_alpha = 0.8
-  ) +
-tm_shape(airbnb_sf) +
-  tm_dots(
-    fill = "price",
-    fill.scale = tm_scale_continuous(values = "YlOrRd"),
-    fill.legend = tm_legend(title = "Price ($)", frame = FALSE),
-    size = 0.15,
-    col = "#00000020"
-  ) +
-tm_title("Airbnb Listing Prices in Los Angeles") +
-tm_compass(type = "arrow", position = c("right", "top"), size = 1.5) +
-tm_scalebar(position = c("left", "bottom"), width = 15) +
-tm_layout(
-  frame = FALSE,
-  legend.outside = TRUE,
-  legend.outside.position = "right"
-)
-
-map_listings
-
-# Save map
-tmap_save(
-  map_listings,
-  filename = file.path(ddir, "la_airbnb_map.png"),
-  width = 10, height = 8, units = "in", dpi = 300, device = png
-)
-```
-
-# MAP 3: Choropleth of mean price by neighbourhood
-
-```{r map-choropleth}
+# =============================================================================
+# FIGURE 2: Mean Airbnb Price by Census Tract (Choropleth)
+# =============================================================================
+```{r figure-2}
 # Fix invalid geometries
 census_tracts_sf <- st_make_valid(census_tracts_sf)
 airbnb_sf <- st_make_valid(airbnb_sf)
@@ -296,15 +221,6 @@ lowest_tracts <- all_highlight %>%
   filter(type == "Lowest") %>%
   mutate(label = factor(label, levels = c("1st Lowest", "2nd Lowest", "3rd Lowest")))
 
-# Define bounding boxes
-mainland_bbox <- st_bbox(c(xmin = 320000, ymin = 3710000, 
-                           xmax = 445000, ymax = 3860000), 
-                         crs = 32611)
-
-catalina_bbox <- st_bbox(c(xmin = 350000, ymin = 3685000, 
-                           xmax = 385000, ymax = 3715000), 
-                         crs = 32611)
-
 # ---- Main Map (Mainland) ----
 tmap_mode("plot")
 
@@ -315,36 +231,24 @@ main_choropleth <- tm_shape(tracts_with_prices, bbox = mainland_bbox) +
     fill.legend = tm_legend(title = "Mean Price ($)")
   ) +
   tm_borders(col = "grey70", lwd = 0.2) +
-  # Highest price tracts - GOLD
   tm_shape(highest_tracts) +
   tm_symbols(
     shape = "label",
     shape.scale = tm_scale_categorical(values = c(24, 25, 23)),
     shape.legend = tm_legend(title = "Highest Price"),
-    fill = "#DAA520",
-    size = 0.8,
-    col = "black",
-    lwd = 1.2
+    fill = "#DAA520", size = 0.8, col = "black", lwd = 1.2
   ) +
-  # Lowest price tracts - RED
   tm_shape(lowest_tracts) +
   tm_symbols(
     shape = "label",
     shape.scale = tm_scale_categorical(values = c(21, 22, 8)),
     shape.legend = tm_legend(title = "Lowest Price"),
-    fill = "#ee1616",
-    size = 0.8,
-    col = "black",
-    lwd = 1.2
+    fill = "#ee1616", size = 0.8, col = "black", lwd = 1.2
   ) +
   tm_title("Mean Airbnb Price by Census Tract", fontface = "bold", size = 1.2) +
   tm_compass(type = "arrow", position = c("right", "top"), size = 2.4) +
   tm_scalebar(position = c("left", "bottom"), width = 15) +
-  tm_layout(
-    frame = TRUE,
-    legend.outside = TRUE,
-    legend.outside.position = "right"
-  )
+  tm_layout(frame = TRUE, legend.outside = TRUE, legend.outside.position = "right")
 
 # ---- Inset Map (Catalina Island) ----
 inset_choropleth <- tm_shape(tracts_with_prices, bbox = catalina_bbox) +
@@ -355,42 +259,21 @@ inset_choropleth <- tm_shape(tracts_with_prices, bbox = catalina_bbox) +
   ) +
   tm_borders(col = "grey70", lwd = 0.3) +
   tm_title("Catalina Island", size = 1.0, fontface = "bold") +
-  tm_layout(
-    frame = TRUE,
-    frame.lwd = 2,
-    bg.color = "white",
-    legend.show = FALSE
-  )
+  tm_layout(frame = TRUE, frame.lwd = 2, bg.color = "white", legend.show = FALSE)
 
-# ---- Save with grid viewports ----
-library(grid)
-
-png(file.path(ddir, "figure_2_choropleth.png"), 
-    width = 12, height = 10, units = "in", res = 300)
-
+# ---- Save Figure 2 ----
+png(file.path(ddir, "figure_2_choropleth.png"), width = 12, height = 10, units = "in", res = 300)
 grid.newpage()
 print(main_choropleth, vp = viewport(x = 0.5, y = 0.5, width = 1, height = 1))
 print(inset_choropleth, vp = viewport(x = 0.87, y = 0.145, width = 0.25, height = 0.25))
-
 dev.off()
-
-main_choropleth
 ```
 
-# Map 4 Census data
-
-```{r}
-knitr::opts_chunk$set(echo = TRUE)
-library(tidycensus)
-library(tidyverse)
-library(sf)
-library(viridis)
-
-census_api_key("c990ed72472399dd626592b06afee9a188d03320", install = TRUE, overwrite = TRUE)
-options(tigris_use_cache = TRUE)
-
-view_vars <- load_variables(2023, "acs5", cache = TRUE)
-
+# =============================================================================
+# FIGURE 3: Socio-economic Variables (Two-panel: Renters and Median Income)
+# =============================================================================
+```{r figure-3-data}
+# Get renter data from tidycensus
 renter_data <- get_acs(
   state = "CA",
   county = "Los Angeles",
@@ -399,66 +282,91 @@ renter_data <- get_acs(
   geometry = TRUE,
   year = 2023,
   output = "wide"
-) %>% tibble()
-```
-
-```{r}
-renter_data <- renter_data %>%
+) %>% 
+  tibble() %>%
   mutate(pct_renter = (renter_occupiedE / total_unitsE) * 100) %>%
   select(GEOID, pct_renter)
 
+# Join renter data to census tracts
 renter_sf <- census_tracts_sf %>%
   left_join(renter_data, by = "GEOID") %>%
   st_make_valid() %>%
-  st_transform(crs = 32611)  # CRS transformation here
+  st_transform(crs = 32611)
 
-tmap_mode = "plot"
-mainland_bbox <- st_bbox(c(xmin = 320000, ymin = 3710000, 
-                           xmax = 445000, ymax = 3860000), 
-                         crs = 32611)
+# Get median income from provided census data
+Median_income <- census_data %>% 
+  select(GEOID, Median_income = B19013_001E) %>%
+  filter(!is.na(Median_income)) 
 
+# Join median income to census tracts
+Median_income_sf <- census_tracts_sf %>%
+  left_join(Median_income, by = "GEOID") %>%
+  st_make_valid() %>%
+  st_transform(crs = 32611)
+```
+```{r figure-3a-renter}
+# ---- Figure 3a: Percentage of Renters ----
+tmap_mode("plot")
 
-catalina_bbox <- st_bbox(c(xmin = 340000, ymin = 3678000, 
-                           xmax = 390000, ymax = 3708000), 
-                         crs = 32611)
-
-# Main map (mainland)
 main_renter <- tm_shape(renter_sf, bbox = mainland_bbox) +
   tm_polygons(
     fill = "pct_renter",
     fill.scale = tm_scale_continuous(values = "YlOrRd"),
     fill.legend = tm_legend(title = "Percentage Renters (%)"),
-    col = "white",
-    lwd = 0.3
+    col = "white", lwd = 0.3
   ) +
-tm_title("Percentage of Renters by Census Tract", fontface = "bold", size = 1.2) +
-tm_compass(type = "arrow", position = c("right", "top"), size = 1.5) +
-tm_scalebar(position = c("left", "bottom"), width = 15) +
-tm_layout(frame = TRUE)
+  tm_title("Percentage of Renters by Census Tract", fontface = "bold", size = 1.2) +
+  tm_compass(type = "arrow", position = c("right", "top"), size = 1.5) +
+  tm_scalebar(position = c("left", "bottom"), width = 15) +
+  tm_layout(frame = TRUE)
 
-# Inset map (Catalina)
 inset_renter <- tm_shape(renter_sf, bbox = catalina_bbox) +
   tm_polygons(
     fill = "pct_renter",
     fill.scale = tm_scale_continuous(values = "YlOrRd"),
     fill.legend = tm_legend(show = FALSE),
-    col = "white",
-    lwd = 0.3
+    col = "white", lwd = 0.3
   ) +
-tm_title("Catalina Island", size = 0.7, fontface = "bold") +
-tm_layout(frame = TRUE,
-          frame.lwd = 2,
-          bg.color = "white")
+  tm_title("Catalina Island", size = 0.7, fontface = "bold") +
+  tm_layout(frame = TRUE, frame.lwd = 2, bg.color = "white")
 
-# Save with grid viewports
-library(grid)
-
-png(file.path(ddir, "renter_map.png"), 
-    width = 10, height = 8, units = "in", res = 300)
-
+# Save Figure 3a
+png(file.path(ddir, "figure_3a_renter_map.png"), width = 10, height = 8, units = "in", res = 300)
 grid.newpage()
 print(main_renter, vp = viewport(x = 0.5, y = 0.5, width = 1, height = 1))
 print(inset_renter, vp = viewport(x = 0.815, y = 0.1325, width = 0.22, height = 0.28))
+dev.off()
+```
+```{r figure-3b-income}
+# ---- Figure 3b: Median Household Income ----
+tmap_mode("plot")
 
+main_income <- tm_shape(Median_income_sf, bbox = mainland_bbox) +
+  tm_polygons(
+    fill = "Median_income",
+    fill.scale = tm_scale_continuous(values = "YlOrRd"),
+    fill.legend = tm_legend(title = "Median Household Income ($)"),
+    col = "white", lwd = 0.3
+  ) +
+  tm_title("Median Household Income in Los Angeles County", fontface = "bold", size = 1.2) +
+  tm_compass(type = "arrow", position = c("right", "top"), size = 1.5) +
+  tm_scalebar(position = c("left", "bottom"), width = 15) +
+  tm_layout(frame = TRUE)
+
+inset_income <- tm_shape(Median_income_sf, bbox = catalina_bbox) +
+  tm_polygons(
+    fill = "Median_income",
+    fill.scale = tm_scale_continuous(values = "YlOrRd"),
+    fill.legend = tm_legend(show = FALSE),
+    col = "white", lwd = 0.3
+  ) +
+  tm_title("Catalina Island", size = 0.7, fontface = "bold") +
+  tm_layout(frame = TRUE, frame.lwd = 2, bg.color = "white")
+
+# Save Figure 3b
+png(file.path(ddir, "figure_3b_income_map.png"), width = 10, height = 8, units = "in", res = 300)
+grid.newpage()
+print(main_income, vp = viewport(x = 0.5, y = 0.5, width = 1, height = 1))
+print(inset_income, vp = viewport(x = 0.815, y = 0.1325, width = 0.22, height = 0.28))
 dev.off()
 ```
