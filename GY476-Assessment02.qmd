@@ -386,46 +386,79 @@ library(tidyverse)
 library(sf)
 library(viridis)
 
-census_api_key("c990ed72472399dd626592b06afee9a188d03320", install = TRUE)
+census_api_key("c990ed72472399dd626592b06afee9a188d03320", install = TRUE, overwrite = TRUE)
 options(tigris_use_cache = TRUE)
 
 view_vars <- load_variables(2023, "acs5", cache = TRUE)
-View(view_vars)
 
-Median_income <- census_data %>% 
-  select(GEOID, Median_income = B19013_001E) %>%
-  filter(!is.na(Median_income))
-
-
+renter_data <- get_acs(
+  state = "CA",
+  county = "Los Angeles",
+  geography = "tract",
+  variables = c(total_units = "B25003_001", renter_occupied = "B25003_003"),
+  geometry = TRUE,
+  year = 2023,
+  output = "wide"
+) %>% tibble()
 ```
 
 ```{r}
-Median_income <- census_data %>% 
-  select(GEOID, Median_income = B19013_001E) %>%
-  filter(!is.na(Median_income)) 
+renter_data <- renter_data %>%
+  mutate(pct_renter = (renter_occupiedE / total_unitsE) * 100) %>%
+  select(GEOID, pct_renter)
 
-Median_income_sf <- census_tracts_sf %>%
-  left_join(Median_income, by = "GEOID") %>%
+renter_sf <- census_tracts_sf %>%
+  left_join(renter_data, by = "GEOID") %>%
   st_make_valid() %>%
-  st_transform(crs = 32611)  # Changed from st_as_sf to st_transform
+  st_transform(crs = 32611)  # CRS transformation here
 
-tmap_mode("plot")
+tmap_mode = "plot"
+mainland_bbox <- st_bbox(c(xmin = 320000, ymin = 3710000, 
+                           xmax = 445000, ymax = 3860000), 
+                         crs = 32611)
 
-tm_shape(Median_income_sf) +
+
+catalina_bbox <- st_bbox(c(xmin = 340000, ymin = 3678000, 
+                           xmax = 390000, ymax = 3708000), 
+                         crs = 32611)
+
+# Main map (mainland)
+main_renter <- tm_shape(renter_sf, bbox = mainland_bbox) +
   tm_polygons(
-    col = "Median_income",
-    col.scale = tm_scale_continuous(values = "YlOrRd"),
-    col.legend = tm_legend(
-      title = "Median Household Income ($)",
-      orientation = "landscape"
-    )
+    fill = "pct_renter",
+    fill.scale = tm_scale_continuous(values = "YlOrRd"),
+    fill.legend = tm_legend(title = "Percentage Renters (%)"),
+    col = "white",
+    lwd = 0.3
   ) +
-  tm_compass(type = "arrow", position = c("right", "top"), size = 1.5) +
-  tm_scalebar(position = c("left", "bottom"), width = 15) +
-  tm_layout(
-    main.title = "Median Household Income in Los Angeles County",
-    main.title.size = 1.2,
-    frame = TRUE
-  )
+tm_title("Percentage of Renters by Census Tract", fontface = "bold", size = 1.2) +
+tm_compass(type = "arrow", position = c("right", "top"), size = 1.5) +
+tm_scalebar(position = c("left", "bottom"), width = 15) +
+tm_layout(frame = TRUE)
 
+# Inset map (Catalina)
+inset_renter <- tm_shape(renter_sf, bbox = catalina_bbox) +
+  tm_polygons(
+    fill = "pct_renter",
+    fill.scale = tm_scale_continuous(values = "YlOrRd"),
+    fill.legend = tm_legend(show = FALSE),
+    col = "white",
+    lwd = 0.3
+  ) +
+tm_title("Catalina Island", size = 0.7, fontface = "bold") +
+tm_layout(frame = TRUE,
+          frame.lwd = 2,
+          bg.color = "white")
+
+# Save with grid viewports
+library(grid)
+
+png(file.path(ddir, "renter_map.png"), 
+    width = 10, height = 8, units = "in", res = 300)
+
+grid.newpage()
+print(main_renter, vp = viewport(x = 0.5, y = 0.5, width = 1, height = 1))
+print(inset_renter, vp = viewport(x = 0.815, y = 0.1325, width = 0.22, height = 0.28))
+
+dev.off()
 ```
