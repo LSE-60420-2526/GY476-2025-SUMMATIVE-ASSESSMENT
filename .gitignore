@@ -52,3 +52,4 @@ rsconnect/
 *.csv
 *.docx
 *.png
+*.DS_Store
