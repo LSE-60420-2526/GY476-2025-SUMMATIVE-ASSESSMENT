@@ -454,4 +454,54 @@ tmap_save(figure_4_bivariate,
 ```
 
 
+Query OpenStreetMap data
 
+```{r open street map}
+if(!require("osmdata")) install.packages("osmdata")
+library("osmdata")
+
+# Assuming all libraries (sf, dplyr, tmap, osmdata) are loaded
+# Assuming 'neighbourhoods_sf' is your polygon layer
+# Assuming 'resturants_points' is your point layer (restaurants)
+
+# --- 1. CLEAN THE MULTIPOLYGON GEOMETRY (Fixes the "Loop is not valid" error) ---
+neighbourhoods_sf_CLEAN <- st_make_valid(neighbourhoods_sf)
+
+# --- 2. SPATIAL JOIN AND AGGREGATION (Fixes the "Column not found" error) ---
+
+# The unique identifier for the grouping is "neighbourhood"
+NEIGHBORHOOD_ID_COL <- "neighbourhood"
+
+neighbourhood_counts <- st_join(neighbourhoods_sf_CLEAN, resturants_points, left = TRUE) %>%
+  # Group by the correct column name
+  group_by(across(all_of(NEIGHBORHOOD_ID_COL))) %>%
+  summarise(
+    # Count the number of restaurants within each neighborhood polygon
+    restaurant_count = sum(!is.na(osm_id)), 
+    # Retain the spatial geometry of the polygon
+    geometry = st_geometry(first(geometry))
+  ) %>%
+  st_set_geometry("geometry")
+
+# --- 3. CREATE THE HEAT MAP (CHOROPLETH) USING TMAP ---
+
+tmap_mode("plot") # Set to static plotting mode
+
+restaurant_density_map <- tm_shape(neighbourhood_counts) +
+  tm_polygons(
+    col = "restaurant_count",         
+    title = "Restaurant Count",
+    palette = "Reds",                 
+    style = "jenks",                   
+    border.col = "white",             
+    border.lwd = 0.5                  
+  ) +
+  tm_layout(
+    main.title = "Restaurant Density by Neighborhood",
+    legend.outside = TRUE
+  )
+
+restaurant_density_map 
+
+
+```
