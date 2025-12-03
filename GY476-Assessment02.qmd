@@ -465,43 +465,58 @@ library("osmdata")
 # Assuming 'resturants_points' is your point layer (restaurants)
 
 # --- 1. CLEAN THE MULTIPOLYGON GEOMETRY (Fixes the "Loop is not valid" error) ---
-neighbourhoods_sf_CLEAN <- st_make_valid(neighbourhoods_sf)
+test_bbox <- c(-119.473572,33.493307,-117.051086,34.633208)
 
-# --- 2. SPATIAL JOIN AND AGGREGATION (Fixes the "Column not found" error) ---
+q <- opq(bbox = test_bbox) |>
+ add_osm_feature(key = "amenity", value = "restaurant") |>
+ osmdata_sf ()
+resturants <- q$osm_points %>% select(name, geometry) %>% filter(!is.na(geometry)) %>%
+  st_coordinates()
 
-# The unique identifier for the grouping is "neighbourhood"
-NEIGHBORHOOD_ID_COL <- "neighbourhood"
-
-neighbourhood_counts <- st_join(neighbourhoods_sf_CLEAN, resturants_points, left = TRUE) %>%
-  # Group by the correct column name
-  group_by(across(all_of(NEIGHBORHOOD_ID_COL))) %>%
-  summarise(
-    # Count the number of restaurants within each neighborhood polygon
-    restaurant_count = sum(!is.na(osm_id)), 
-    # Retain the spatial geometry of the polygon
-    geometry = st_geometry(first(geometry))
-  ) %>%
-  st_set_geometry("geometry")
-
-# --- 3. CREATE THE HEAT MAP (CHOROPLETH) USING TMAP ---
-
-tmap_mode("plot") # Set to static plotting mode
-
-restaurant_density_map <- tm_shape(neighbourhood_counts) +
-  tm_polygons(
-    col = "restaurant_count",         
-    title = "Restaurant Count",
-    palette = "Reds",                 
-    style = "jenks",                   
-    border.col = "white",             
-    border.lwd = 0.5                  
+p <- ggplot() +
+  stat_density_2d_filled(
+    data = resturants,
+    aes(x = X, y = Y),
+    contour_var = "density",
+    bins = 15,
+    alpha = 0.9,
+    # 'adjust' controls the smoothness. 
+    # If the blobs look too jagged after zooming out, try increasing this (e.g., 1.5)
+    adjust = 1 
   ) +
-  tm_layout(
-    main.title = "Restaurant Density by Neighborhood",
-    legend.outside = TRUE
+  geom_sf(
+    data = neighbourhoods_sf,
+    fill = NA,
+    colour = "white",
+    linewidth = 0.2
+  ) +
+  scale_fill_viridis_d(
+    option = "inferno",
+    name = "Density",
+    guide = guide_legend(reverse = TRUE)
+  ) +
+  coord_sf() +
+  labs(
+    title = "Restaurant Density",
+    x = NULL,
+    y = NULL
+  ) +
+  theme_void(base_size = 12) +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(face = "bold", hjust = 0.5, margin = margin(b = 10), color = "white"), # Added color white for visibility
+    plot.background = element_rect(fill = "black", colour = NA),
+    legend.text = element_text(colour = "white"),
+    legend.title = element_text(colour = "white")
   )
 
-restaurant_density_map 
+# Save it
+ggsave(file.path(ddir, "figure6.png"), p, width = 10, height = 8, dpi = 300)
+
+
+
+#
 
 
 ```
+
