@@ -105,7 +105,7 @@ airbnb_sf <- airbnb_raw %>%
     price <= (Q3 + 1.5 * IQR_val)
   ) %>%
   st_as_sf(coords = c("longitude", "latitude")) %>%
-  st_set_crs(4326)
+  st_set_crs(32611)
 ```
 
 
@@ -244,4 +244,21 @@ tmap_save(
   filename = file.path(ddir, "la_choropleth_map.pdf"),
   width = 12, height = 10
 )
+```
+
+figure 6
+
+```{r}
+
+acton_sf <- neighbourhoods_sf %>%
+  filter(neighbourhood == "Acton") %>% st_as_sf() %>% st_transform(crs = 32611)
+acton_airbnb 
+ggplot() +
+  geom_sf(data = acton_sf, aes(color = "black")) + 
+  labs(title = "Restaurants within 200m Proximity in Acton")
+  
+
+theme_minimal()
+
+
 ```

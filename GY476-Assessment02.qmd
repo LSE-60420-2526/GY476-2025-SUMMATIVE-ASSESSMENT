@@ -460,11 +460,9 @@ Query OpenStreetMap data
 if(!require("osmdata")) install.packages("osmdata")
 library("osmdata")
 
-# Assuming all libraries (sf, dplyr, tmap, osmdata) are loaded
-# Assuming 'neighbourhoods_sf' is your polygon layer
-# Assuming 'resturants_points' is your point layer (restaurants)
 
-# --- 1. CLEAN THE MULTIPOLYGON GEOMETRY (Fixes the "Loop is not valid" error) ---
+
+
 test_bbox <- c(-119.473572,33.493307,-117.051086,34.633208)
 
 q <- opq(bbox = test_bbox) |>
@@ -510,13 +508,88 @@ p <- ggplot() +
     legend.title = element_text(colour = "white")
   )
 
-# Save it
-ggsave(file.path(ddir, "figure6.png"), p, width = 10, height = 8, dpi = 300)
-
-
-
-#
-
+ggsave(file.path(ddir, "figure5.png"), p, width = 10, height = 8, dpi = 300)
 
 ```
+
+```{r}
+# Step 1: Find best neighbourhood for your analysis
+neighbourhood_stats <- neighbourhoods_sf %>%
+  st_transform(crs = 32611) %>%
+  mutate(
+    n_airbnbs = lengths(st_intersects(., airbnbs_sf %>% st_transform(32611))),
+    n_restaurants = lengths(st_intersects(., restaurants_sf %>% st_transform(32611)))
+  ) %>%
+  st_drop_geometry() %>%
+  filter(n_restaurants > 5, n_airbnbs > 20) %>%
+  arrange(desc(n_restaurants))
+
+print(neighbourhood_stats)
+
+# Step 2: Set your chosen neighbourhood
+chosen_neighbourhood <- "Hollywood"  # <-- change based on results
+
+library(ggspatial)
+
+library(ggspatial)
+
+p <- ggplot() +
+  geom_sf(data = target_sf, fill = "#f8f9fa", color = "#495057", linewidth = 0.5) +
+  geom_sf(data = buffer_union, aes(fill = "Within 200m"), alpha = 0.2, color = NA) +
+  geom_sf(data = target_airbnbs, aes(color = "Outside 200m"), shape = 16, size = 1, alpha = 0.4) +
+  geom_sf(data = airbnbs_near, aes(color = "Airbnb (within 200m)"), shape = 16, size = 2) +
+  geom_sf(data = target_restaurants, aes(color = "Restaurant"), shape = 17, size = 2) +
+  annotation_scale(
+    location = "br",
+    width_hint = 0.15,
+    style = "ticks",
+    line_width = 0.5,
+    height = unit(0.15, "cm"),
+    pad_x = unit(0.5, "cm"),
+    pad_y = unit(0.5, "cm")
+  ) +
+  annotation_north_arrow(
+    location = "tr",
+    which_north = "true",
+    height = unit(1, "cm"),
+    width = unit(1, "cm"),
+    pad_x = unit(0.5, "cm"),
+    pad_y = unit(0.5, "cm"),
+    style = north_arrow_fancy_orienteering
+  ) +
+  scale_fill_manual(
+    name = NULL,
+    values = c("Within 200m" = "#e63946"),
+    guide = guide_legend(order = 1, override.aes = list(alpha = 0.2))
+  ) +
+  scale_color_manual(
+    name = NULL,
+    values = c("Outside 200m" = "grey70", 
+               "Airbnb (within 200m)" = "#1d3557", 
+               "Restaurant" = "#e63946"),
+    guide = guide_legend(order = 2, override.aes = list(
+      shape = c(16, 16, 17),
+      size = c(2, 3, 3),
+      alpha = 1
+    ))
+  ) +
+  labs(
+    title = paste("Airbnb Listings within 200m of Restaurants in", chosen_neighbourhood),
+    subtitle = paste0(nrow(airbnbs_near), " of ", nrow(target_airbnbs), 
+                      " listings within walking distance of ", nrow(target_restaurants), " restaurants"),
+    caption = "Data: Inside Airbnb & OpenStreetMap | CRS: EPSG 32611"
+  ) +
+  theme_void(base_size = 11) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+    plot.subtitle = element_text(hjust = 0.5, color = "grey40", margin = margin(t = 5, b = 10)),
+    plot.caption = element_text(hjust = 0.5, color = "grey50", size = 8),
+    plot.margin = margin(15, 15, 15, 15),
+    legend.position = "bottom",
+    legend.box.margin = margin(t = 10)
+  )
+
+ggsave(file.path(ddir, "figure6.png"), p, width = 10, height = 8, dpi = 300)
+```
+
 
