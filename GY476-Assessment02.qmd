@@ -512,24 +512,41 @@ ggsave(file.path(ddir, "figure5.png"), p, width = 10, height = 8, dpi = 300)
 
 ```
 
+figure 6
 ```{r}
-# Step 1: Find best neighbourhood for your analysis
-neighbourhood_stats <- neighbourhoods_sf %>%
+library(sf)
+library(dplyr)
+library(ggplot2)
+
+restaurants_sf <- q$osm_points %>%
+  select(name, geometry) %>%
+  filter(!is.na(geometry)) %>%
+  st_as_sf()
+# Set your chosen neighbourhood
+chosen_neighbourhood <- "Hollywood"
+
+# Filter to neighbourhood
+target_sf <- neighbourhoods_sf %>%
+  filter(neighbourhood == chosen_neighbourhood) %>%
+  st_transform(crs = 32611)
+
+# Get restaurants in that neighbourhood
+target_restaurants <- restaurants_sf %>%
   st_transform(crs = 32611) %>%
-  mutate(
-    n_airbnbs = lengths(st_intersects(., airbnbs_sf %>% st_transform(32611))),
-    n_restaurants = lengths(st_intersects(., restaurants_sf %>% st_transform(32611)))
-  ) %>%
-  st_drop_geometry() %>%
-  filter(n_restaurants > 5, n_airbnbs > 20) %>%
-  arrange(desc(n_restaurants))
+  st_filter(target_sf)
 
-print(neighbourhood_stats)
+# Create 200m buffers
+restaurant_buffers <- st_buffer(target_restaurants, dist = 200)
+buffer_union <- st_union(restaurant_buffers)
 
-# Step 2: Set your chosen neighbourhood
-chosen_neighbourhood <- "Hollywood"  # <-- change based on results
+# Get all Airbnbs in neighbourhood
+target_airbnbs <- airbnb_sf %>%
+  st_transform(crs = 32611) %>%
+  st_filter(target_sf)
 
-library(ggspatial)
+# Find Airbnbs within 200m of restaurants
+airbnbs_near <- target_airbnbs %>%
+  filter(lengths(st_intersects(., restaurant_buffers)) > 0)
 
 library(ggspatial)
 
@@ -589,7 +606,15 @@ p <- ggplot() +
     legend.box.margin = margin(t = 10)
   )
 
-ggsave(file.path(ddir, "figure6.png"), p, width = 10, height = 8, dpi = 300)
+p
+
 ```
 
 
+pattern point analysis airbnb price
+
+```{r}
+ggplot() +
+  geom_sf(data = airbnb_sf, aes(geomtry))
+
+```
