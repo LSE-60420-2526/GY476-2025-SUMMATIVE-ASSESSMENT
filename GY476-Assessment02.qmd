@@ -615,24 +615,39 @@ pattern point analysis of airbnb price
 
 ```{r}
 
-
 library(spatstat)
-library(stars)
-library(tmap)
-library(sf) # Added: Required for st_bbox, st_filter, etc.
+library(sf)
 
-# ---- 1. Define focused bounding box (Coastal LA) ----
+# Create window (don't rescale yet)
+neighbourhoods_sf_transformed <- neighbourhoods_sf %>% 
+  st_set_crs(4326) %>% 
+  st_transform(32611)
 
-focus_bbox <- st_bbox(c(
-  xmin = 355000, ymin = 3750000,
-  xmax = 385000, ymax = 3780000
-), crs = 32611)
+BA_boundary <- st_union(neighbourhoods_sf_transformed)
+BA_owin_m <- as.owin(BA_boundary)
 
-k1 <- as.ppp(airbnb_sf) %>% rescale(1000)
-marks(k1)
-pp_focus_bbox <- as.owin(focus_bbox)
-window(k1) <- pp_focus_bbox
+# Transform listings
+listings_transformed <- airbnb_sf %>%
+  st_transform(32611)
 
+coords <- st_coordinates(listings_transformed)
 
+# Create ppp with unscaled window (both in metres)
+listings_ppp <- ppp(
+  x = coords[, 1],
+  y = coords[, 2],
+  window = BA_owin_m
+)
 
+# Now rescale everything together
+listings_ppp <- rescale(listings_ppp, 1000)
+BA_owin <- rescale(BA_owin_m, 1000)
+
+marks(listings_ppp) <- NULL
+
+# Plot
+K1 <- density.ppp(listings_ppp) 
+plot(K1, main = NULL, las = 1)
+contour(K1, add = TRUE)
+plot(BA_owin, add = TRUE)
 ```
