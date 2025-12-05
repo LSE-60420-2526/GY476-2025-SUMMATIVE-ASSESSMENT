@@ -522,8 +522,7 @@ restaurants_sf <- q$osm_points %>%
   select(name, geometry) %>%
   filter(!is.na(geometry)) %>%
   st_as_sf()
-# Set your chosen neighbourhood
-chosen_neighbourhood <- "Hollywood"
+
 
 # Filter to neighbourhood
 target_sf <- neighbourhoods_sf %>%
@@ -618,36 +617,29 @@ pattern point analysis of airbnb price
 library(spatstat)
 library(sf)
 
-# Create window (don't rescale yet)
-neighbourhoods_sf_transformed <- neighbourhoods_sf %>% 
-  st_set_crs(4326) %>% 
-  st_transform(32611)
 
 BA_boundary <- st_union(neighbourhoods_sf_transformed)
 BA_owin_m <- as.owin(BA_boundary)
 
-# Transform listings
 listings_transformed <- airbnb_sf %>%
   st_transform(32611)
 
 coords <- st_coordinates(listings_transformed)
 
-# Create ppp with unscaled window (both in metres)
 listings_ppp <- ppp(
   x = coords[, 1],
   y = coords[, 2],
   window = BA_owin_m
 )
 
-# Now rescale everything together
 listings_ppp <- rescale(listings_ppp, 1000)
 BA_owin <- rescale(BA_owin_m, 1000)
-
 marks(listings_ppp) <- NULL
 
-# Plot
-K1 <- density.ppp(listings_ppp) 
-plot(K1, main = NULL, las = 1)
+# Increase sigma for smoother output (adjust value as needed)
+K1 <- density.ppp(listings_ppp, sigma = 2)
+
+plot(K1, main = "Kernel Density of Airbnb Listings in Los Angeles", las = 1)
 contour(K1, add = TRUE)
 plot(BA_owin, add = TRUE)
 ```
