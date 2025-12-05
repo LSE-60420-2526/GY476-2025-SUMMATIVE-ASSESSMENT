@@ -611,10 +611,28 @@ p
 ```
 
 
-pattern point analysis airbnb price
+pattern point analysis of airbnb price
 
 ```{r}
-ggplot() +
-  geom_sf(data = airbnb_sf, aes(geomtry))
+
+
+library(spatstat)
+library(stars)
+library(tmap)
+library(sf) # Added: Required for st_bbox, st_filter, etc.
+
+# ---- 1. Define focused bounding box (Coastal LA) ----
+
+focus_bbox <- st_bbox(c(
+  xmin = 355000, ymin = 3750000,
+  xmax = 385000, ymax = 3780000
+), crs = 32611)
+
+k1 <- as.ppp(airbnb_sf) %>% rescale(1000)
+marks(k1)
+pp_focus_bbox <- as.owin(focus_bbox)
+window(k1) <- pp_focus_bbox
+
+
 
 ```
