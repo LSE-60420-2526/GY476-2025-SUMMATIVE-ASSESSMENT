@@ -643,3 +643,46 @@ plot(K1, main = "Kernel Density of Airbnb Listings in Los Angeles", las = 1)
 contour(K1, add = TRUE)
 plot(BA_owin, add = TRUE)
 ```
+
+
+```{r}
+library(spatstat)
+library(sf)
+
+neighbourhoods_sf_transformed <- neighbourhoods_sf %>% 
+  st_set_crs(4326) %>% 
+  st_transform(32611)
+
+BA_boundary <- st_union(neighbourhoods_sf_transformed)
+BA_owin_m <- as.owin(BA_boundary)
+
+# Prepare listings with price
+listings_transformed <- airbnb_sf %>%
+  st_transform(32611) %>%
+  filter(!is.na(price), price > 0)
+
+coords <- st_coordinates(listings_transformed)
+
+# Create ppp with price as marks
+listings_ppp <- ppp(
+  x = coords[, 1],
+  y = coords[, 2],
+  marks = listings_transformed$price,
+  window = BA_owin_m
+)
+
+# Rescale to km
+listings_ppp <- rescale(listings_ppp, 1000)
+BA_owin <- rescale(BA_owin_m, 1000)
+
+# IDW interpolation using Smooth.ppp
+# sigma controls smoothing, inverse.weights gives IDW behaviour
+price_idw <- Smooth.ppp(listings_ppp, sigma = 2)
+
+# Plot
+plot(price_idw, main = "IDW Interpolation of Airbnb Prices in Los Angeles", las = 1)
+contour(price_idw, add = TRUE)
+plot(BA_owin, add = TRUE)
+
+
+```
