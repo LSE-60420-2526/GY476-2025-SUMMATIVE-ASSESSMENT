@@ -1,19 +1,22 @@
 ---
 title: "Assessment 2 GY476"
 output:
-  html_document: default
-  pdf_document: default
+  html_document: 
+    toc: true
+    toc_float: true
+    theme: cosmo
 ---
 
-# =============================================================================
-# SETUP: Load packages and set directories
-# =============================================================================
-```{r setup}
+# Setup and Data Loading
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, 
+                      fig.align = 'center', fig.width = 12, fig.height = 8)
+
 # Set working directory
 wdir <- "/Users/dylanhillier/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/GY476_Geographic_Information_System/assessment02"
 
 # Load required packages
-if(!require("tidyverse")) install.packages("tidyverse")
 library(tidyverse)
 library(ggplot2)
 library(dplyr)
@@ -21,57 +24,64 @@ library(sf)
 library(tmap)
 library(tidycensus)
 library(grid)
+library(osmdata)
+library(ggspatial)
+library(spatstat)
 
-# Create data directory if it doesn't exist
-if(!dir.exists(file.path(wdir, "data"))) {
-  dir.create(file.path(wdir, "data"))
-}
+# Create data directory
 ddir <- file.path(wdir, "data")
+if(!dir.exists(ddir)) dir.create(ddir)
 
-# Census API key
-census_api_key("c990ed72472399dd626592b06afee9a188d03320", install = TRUE, overwrite = TRUE)
+# Census API key - load from environment variable for security
+# To set up: Add CENSUS_API_KEY=your_key_here to your .Renviron file
+# Or use: Sys.setenv(CENSUS_API_KEY = "your_key_here") in your R console
+api_key <- Sys.getenv("CENSUS_API_KEY")
+if(api_key == "") {
+  stop("Census API key not found. Please set CENSUS_API_KEY environment variable.")
+}
+census_api_key(api_key, install = TRUE, overwrite = TRUE)
 ```
 
-# =============================================================================
-# DOWNLOAD DATA: Airbnb listings and neighbourhood boundaries
-# =============================================================================
-```{r download-data}
+```{r download-data, include=FALSE}
 # Download Airbnb listings
-download.file(
-  url = "https://data.insideairbnb.com/united-states/ca/los-angeles/2025-09-01/visualisations/listings.csv",
-  destfile = file.path(ddir, "listing.csv")
-)
+if(!file.exists(file.path(ddir, "listing.csv"))) {
+  download.file(
+    url = "https://data.insideairbnb.com/united-states/ca/los-angeles/2025-09-01/visualisations/listings.csv",
+    destfile = file.path(ddir, "listing.csv")
+  )
+}
 
 # Download neighbourhood boundaries
-download.file(
-  url = "https://data.insideairbnb.com/united-states/ca/los-angeles/2025-09-01/visualisations/neighbourhoods.geojson",
-  destfile = file.path(ddir, "neighbourhoods.geojson")
-)
+if(!file.exists(file.path(ddir, "neighbourhoods.geojson"))) {
+  download.file(
+    url = "https://data.insideairbnb.com/united-states/ca/los-angeles/2025-09-01/visualisations/neighbourhoods.geojson",
+    destfile = file.path(ddir, "neighbourhoods.geojson")
+  )
+}
 ```
 
-# =============================================================================
-# LOAD DATA: Read in all datasets
-# =============================================================================
-```{r load-data}
+```{r load-data, include=FALSE}
 # Airbnb listings
 airbnb_raw <- read.csv(file.path(ddir, "listing.csv"))
 
 # Neighbourhood boundaries
-neighbourhoods_sf <- st_read(file.path(ddir, "neighbourhoods.geojson"))
+neighbourhoods_sf <- st_read(file.path(ddir, "neighbourhoods.geojson"), quiet = TRUE) %>%
+  st_set_crs(4326) %>%
+  st_transform(32611)
 
 # LA census tract geometry
-census_tracts_sf <- st_read(file.path(ddir, "LA_geometry.gpkg")) %>%
-  st_transform(32611)
+census_tracts_sf <- st_read(file.path(ddir, "LA_geometry.gpkg"), quiet = TRUE) %>%
+  st_transform(32611) %>%
+  st_make_valid()
 
 # Census data
 census_data <- read.csv(file.path(ddir, "ACS_2019_2023_LA_vars.csv")) %>%
-  tibble() %>%
   mutate(
     GEOID = as.character(GEOID),
     GEOID = paste0("06", str_sub(GEOID, start = 2))
   )
 
-# Define bounding boxes (reused for all maps)
+# Define bounding boxes
 mainland_bbox <- st_bbox(c(xmin = 320000, ymin = 3710000, 
                            xmax = 445000, ymax = 3860000), 
                          crs = 32611)
@@ -79,20 +89,13 @@ mainland_bbox <- st_bbox(c(xmin = 320000, ymin = 3710000,
 catalina_bbox <- st_bbox(c(xmin = 340000, ymin = 3678000, 
                            xmax = 390000, ymax = 3708000), 
                          crs = 32611)
-```
 
-# =============================================================================
-# JOIN DATA: Combine census geometry with census data
-# =============================================================================
-```{r join-census}
+# Join census data
 census_joined <- census_tracts_sf %>%
   left_join(census_data, by = "GEOID")
 ```
 
-# =============================================================================
-# PREPARE AIRBNB DATA: Remove outliers and convert to spatial
-# =============================================================================
-```{r prepare-airbnb}
+```{r prepare-airbnb, include=FALSE}
 # Calculate IQR bounds for outlier removal
 Q1 <- quantile(airbnb_raw$price, 0.25, na.rm = TRUE)
 Q3 <- quantile(airbnb_raw$price, 0.75, na.rm = TRUE)
@@ -100,7 +103,6 @@ IQR_val <- Q3 - Q1
 
 # Filter outliers and convert to sf object
 airbnb_sf <- airbnb_raw %>%
-  tibble() %>%
   filter(
     price >= (Q1 - 1.5 * IQR_val) & 
     price <= (Q3 + 1.5 * IQR_val)
@@ -111,10 +113,10 @@ airbnb_sf <- airbnb_raw %>%
   st_make_valid()
 ```
 
-# =============================================================================
-# FIGURE 1: Airbnb Listings by Room Type (Two-panel map)
-# =============================================================================
-```{r figure-1}
+# Spatial Distribution of Airbnb Listings
+
+```{r figure-1, fig.cap="**Figure 1:** Spatial distribution of Airbnb listings in Los Angeles County by room type. Left panel shows entire home/apartment listings concentrated in coastal and central areas. Right panel displays hotel rooms, private rooms, and shared rooms with similar geographic patterns but lower densities.", fig.width=14, fig.height=8}
+
 # Split by room type
 airbnb_entire <- airbnb_sf %>%
   filter(room_type == "Entire home/apt")
@@ -124,7 +126,7 @@ airbnb_other <- airbnb_sf %>%
 
 tmap_mode("plot")
 
-# ---- Panel 1: Entire Home/Apartment ----
+# Panel 1: Entire Home/Apartment
 main_entire <- tm_shape(census_tracts_sf, bbox = mainland_bbox) +
   tm_borders(col = "grey70", lwd = 0.3) +
   tm_shape(airbnb_entire) +
@@ -142,7 +144,7 @@ inset_entire <- tm_shape(census_tracts_sf, bbox = catalina_bbox) +
   tm_title("Catalina Island", size = 0.7, fontface = "bold") +
   tm_layout(frame = TRUE, frame.lwd = 2, bg.color = "white")
 
-# ---- Panel 2: Hotel/Private/Shared Room ----
+# Panel 2: Hotel/Private/Shared Room
 main_other <- tm_shape(census_tracts_sf, bbox = mainland_bbox) +
   tm_borders(col = "grey70", lwd = 0.3) +
   tm_shape(airbnb_other) +
@@ -160,8 +162,7 @@ inset_other <- tm_shape(census_tracts_sf, bbox = catalina_bbox) +
   tm_title("Catalina Island", size = 0.7, fontface = "bold") +
   tm_layout(frame = TRUE, frame.lwd = 2, bg.color = "white")
 
-# ---- Save Figure 1 ----
-png(file.path(ddir, "figure_1_room_types.png"), width = 14, height = 8, units = "in", res = 300)
+# Print combined figure
 grid.newpage()
 pushViewport(viewport(layout = grid.layout(1, 2)))
 pushViewport(viewport(layout.pos.col = 1))
@@ -172,23 +173,18 @@ pushViewport(viewport(layout.pos.col = 2))
 print(main_other, vp = viewport(x = 0.5, y = 0.5, width = 0.95, height = 0.95))
 print(inset_other, vp = viewport(x = 0.78, y = 0.17, width = 0.22, height = 0.28))
 popViewport()
-dev.off()
 ```
 
-# =============================================================================
-# FIGURE 2: Mean Airbnb Price by Census Tract (Choropleth)
-# =============================================================================
-```{r figure-2}
-# Fix invalid geometries
-census_tracts_sf <- st_make_valid(census_tracts_sf)
-airbnb_sf <- st_make_valid(airbnb_sf)
+# Mean Airbnb Prices by Census Tract
+
+```{r figure-2, fig.cap="**Figure 2:** Choropleth map showing mean Airbnb prices aggregated by census tract. Golden triangles indicate the three highest-priced tracts (concentrated in coastal areas), while red circles mark the three lowest-priced tracts. Color intensity reflects price gradient from yellow (lower) to red (higher).", fig.width=12, fig.height=10}
 
 # Calculate mean price per census tract
 tract_prices <- airbnb_sf %>%
   st_join(census_tracts_sf) %>%
   st_drop_geometry() %>%
   group_by(GEOID) %>%
-  summarise(mean_price = mean(price, na.rm = TRUE))
+  summarise(mean_price = mean(price, na.rm = TRUE), .groups = 'drop')
 
 # Join prices back to census tract geometry
 tracts_with_prices <- census_tracts_sf %>%
@@ -212,7 +208,6 @@ all_highlight <- tracts_with_prices %>%
   ) %>%
   st_centroid()
 
-# Split into highest and lowest
 highest_tracts <- all_highlight %>% 
   filter(type == "Highest") %>%
   mutate(label = factor(label, levels = c("1st Highest", "2nd Highest", "3rd Highest")))
@@ -221,9 +216,9 @@ lowest_tracts <- all_highlight %>%
   filter(type == "Lowest") %>%
   mutate(label = factor(label, levels = c("1st Lowest", "2nd Lowest", "3rd Lowest")))
 
-# ---- Main Map (Mainland) ----
 tmap_mode("plot")
 
+# Main Map
 main_choropleth <- tm_shape(tracts_with_prices, bbox = mainland_bbox) +
   tm_fill(
     fill = "mean_price",
@@ -250,7 +245,7 @@ main_choropleth <- tm_shape(tracts_with_prices, bbox = mainland_bbox) +
   tm_scalebar(position = c("left", "bottom"), width = 15) +
   tm_layout(frame = TRUE, legend.outside = TRUE, legend.outside.position = "right")
 
-# ---- Inset Map (Catalina Island) ----
+# Inset Map
 inset_choropleth <- tm_shape(tracts_with_prices, bbox = catalina_bbox) +
   tm_fill(
     fill = "mean_price",
@@ -261,75 +256,55 @@ inset_choropleth <- tm_shape(tracts_with_prices, bbox = catalina_bbox) +
   tm_title("Catalina Island", size = 1.0, fontface = "bold") +
   tm_layout(frame = TRUE, frame.lwd = 2, bg.color = "white", legend.show = FALSE)
 
-# ---- Save Figure 2 ----
-png(file.path(ddir, "figure_2_choropleth.png"), width = 12, height = 10, units = "in", res = 300)
+# Print combined figure
 grid.newpage()
 print(main_choropleth, vp = viewport(x = 0.5, y = 0.5, width = 1, height = 1))
 print(inset_choropleth, vp = viewport(x = 0.87, y = 0.145, width = 0.25, height = 0.25))
-dev.off()
 ```
 
-# =============================================================================
-# FIGURE 3: Socio-economic Variables (Combined Panel)
-# =============================================================================
+# Socio-Economic Characteristics
 
-# ---- 1. Data Preparation ----
-# (Your existing code correctly standardizes renters by total units) 
-# =============================================================================
-# FIGURE 3: Socio-economic Variables (Combined Panel)
-# =============================================================================
-```{r figure-3-data}
-# Get renter data from tidycensus (Uses get_acs)
+```{r figure-3-data, include=FALSE}
+# Get renter data from tidycensus
 renter_data <- get_acs(
   state = "CA",
   county = "Los Angeles",
   geography = "tract",
   variables = c(total_units = "B25003_001", renter_occupied = "B25003_003"),
-  geometry = TRUE,
+  geometry = FALSE,
   year = 2023,
   output = "wide"
 ) %>% 
-  tibble() %>%
-  # Calculate Percentage Renters
   mutate(pct_renter = (renter_occupiedE / total_unitsE) * 100) %>%
   select(GEOID, pct_renter)
 
-# Join renter data to census tracts (used for Panel A)
+# Join renter data to census tracts
 renter_sf <- census_tracts_sf %>%
-  left_join(renter_data, by = "GEOID") %>%
-  st_make_valid() %>%
-  st_transform(crs = 32611)
+  left_join(renter_data, by = "GEOID")
 
 # Get median income from provided census data
-Median_income <- census_data %>% 
-  select(GEOID, Median_income = B19013_001E) %>%
-  filter(!is.na(Median_income)) 
-
-# Join median income to census tracts (used for Panel B & Figure 4)
 Median_income_sf <- census_tracts_sf %>%
-  left_join(Median_income, by = "GEOID") %>%
-  st_make_valid() %>%
-  st_transform(crs = 32611)
+  left_join(
+    census_data %>% select(GEOID, Median_income = B19013_001E),
+    by = "GEOID"
+  )
 ```
 
-# ... [Keep your data preparation code from step 1 exactly the same] ...
-```{r}
-# ---- 2. Define Map Objects ----
+```{r figure-3, fig.cap="**Figure 3:** Socio-economic characteristics of Los Angeles County census tracts. Panel A (left) shows percentage of renter-occupied housing units, with darker red indicating higher rental rates. Panel B (right) displays median household income, where darker blue represents higher income levels. Both maps reveal distinct spatial patterns of socio-economic stratification.", fig.width=14, fig.height=9}
+
 tmap_mode("plot")
 
-# -- Panel A: Renters --
+# Panel A: Renters
 main_renter <- tm_shape(renter_sf, bbox = mainland_bbox) +
   tm_polygons(
     fill = "pct_renter",
     fill.scale = tm_scale_continuous(values = "YlOrRd"),
-    # Orientation landscape works best for bottom legends
     fill.legend = tm_legend(title = "Percentage Renters (%)", orientation = "landscape"), 
     col = "white", lwd = 0.1
   ) +
   tm_title("A: Renter Occupancy", fontface = "bold", size = 1.2) +
   tm_compass(type = "arrow", position = c("right", "top"), size = 1.5) +
   tm_scalebar(position = c("right", "bottom"), width = 10) +
-  # CHANGE: Move legend outside to the bottom
   tm_layout(frame = TRUE, 
             legend.outside = TRUE, 
             legend.outside.position = "bottom",
@@ -346,19 +321,17 @@ inset_renter <- tm_shape(renter_sf, bbox = catalina_bbox) +
   tm_title("Catalina Is.", size = 0.6, fontface = "bold") +
   tm_layout(frame = TRUE, frame.lwd = 1, bg.color = "white")
 
-# -- Panel B: Income --
+# Panel B: Income
 main_income <- tm_shape(Median_income_sf, bbox = mainland_bbox) +
   tm_polygons(
     fill = "Median_income",
     fill.scale = tm_scale_continuous(values = "GnBu"),
-    # Orientation landscape works best for bottom legends
     fill.legend = tm_legend(title = "Median Income ($)", orientation = "landscape"),
     col = "white", lwd = 0.1
   ) +
   tm_title("B: Median Household Income", fontface = "bold", size = 1.2) +
   tm_compass(type = "arrow", position = c("right", "top"), size = 1.5) +
   tm_scalebar(position = c("right", "bottom"), width = 10) +
-  # CHANGE: Move legend outside to the bottom
   tm_layout(frame = TRUE, 
             legend.outside = TRUE, 
             legend.outside.position = "bottom",
@@ -375,40 +348,27 @@ inset_income <- tm_shape(Median_income_sf, bbox = catalina_bbox) +
   tm_title("Catalina Is.", size = 0.6, fontface = "bold") +
   tm_layout(frame = TRUE, frame.lwd = 1, bg.color = "white")
 
-# ---- 3. Render Combined Figure ----
-png(file.path(ddir, "figure_3_socioeconomic_combined.png"), width = 14, height = 9, units = "in", res = 300)
-
+# Print combined figure
 grid.newpage()
 pushViewport(viewport(layout = grid.layout(1, 2)))
-
-# --- Left Column (Renters) ---
 pushViewport(viewport(layout.pos.col = 1))
-  print(main_renter, vp = viewport(x = 0.5, y = 0.5, width = 0.98, height = 0.98))
-  # Adjusted y position slightly to account for the layout change
-  print(inset_renter, vp = viewport(x = 0.78, y = 0.25, width = 0.22, height = 0.28))
+print(main_renter, vp = viewport(x = 0.5, y = 0.5, width = 0.98, height = 0.98))
+print(inset_renter, vp = viewport(x = 0.78, y = 0.25, width = 0.22, height = 0.28))
 popViewport()
-
-# --- Right Column (Income) ---
 pushViewport(viewport(layout.pos.col = 2))
-  print(main_income, vp = viewport(x = 0.5, y = 0.5, width = 0.98, height = 0.98))
-  # Adjusted y position slightly to account for the layout change
-  print(inset_income, vp = viewport(x = 0.78, y = 0.25, width = 0.22, height = 0.28))
+print(main_income, vp = viewport(x = 0.5, y = 0.5, width = 0.98, height = 0.98))
+print(inset_income, vp = viewport(x = 0.78, y = 0.25, width = 0.22, height = 0.28))
 popViewport()
-
-dev.off()
 ```
 
-#figure 4 need to get bivariate map of renter data percentage and ln(of price of )
+# Bivariate Analysis: Price and Rental Patterns
 
-```{r}
-library(ggplot2)
+```{r figure-4, fig.cap="**Figure 4:** Bivariate choropleth map examining the relationship between log-transformed Airbnb prices and percentage of renter-occupied housing. The purple-gold color scheme simultaneously displays both variables, revealing areas where high rental rates coincide with elevated Airbnb prices.", fig.width=10, fig.height=10}
 
+# Join renter and price data
+summary_sf <- st_join(renter_sf, airbnb_sf, join = st_intersects)
 
-summary_sf <- st_join(renter_sf, airbnb_sf, join = st_intersects) %>%
-  tibble()
-  
-tmap_mode = "plot"
-# Rename for clarity and select only the necessary columns/geometry for mapping
+# Prepare bivariate data
 adjusted_summary_sf <- summary_sf %>%
   mutate(
     Price = log(price),
@@ -416,13 +376,6 @@ adjusted_summary_sf <- summary_sf %>%
   ) %>%
   select(GEOID, Price, `% That Rent`, geom) %>%
   st_as_sf()
-
-# Check the result (should be an sf object with 3 non-geometry columns)
-# head(adjusted_summary_sf)
- 
-# =============================================================================
-# FIGURE 4: Bivariate Map (Ln Price and Percentage Renters)
-# =============================================================================
 
 tmap_mode("plot")
 
@@ -444,42 +397,40 @@ figure_4_bivariate <- tm_shape(adjusted_summary_sf, bbox = mainland_bbox) +
   )
 
 figure_4_bivariate
-
-# Save Figure 4
-tmap_save(figure_4_bivariate, 
-          filename = file.path(ddir, "figure_4_bivariate.png"), 
-          width = 10, height = 10, units = "in", dpi = 300, device = png)
-
-
 ```
 
+# Restaurant Density Analysis
 
-Query OpenStreetMap data
+```{r figure-5-data, include=FALSE, cache=TRUE}
+# Query OpenStreetMap for restaurants
+test_bbox <- c(-119.473572, 33.493307, -117.051086, 34.633208)
 
-```{r open street map}
-if(!require("osmdata")) install.packages("osmdata")
-library("osmdata")
+q <- opq(bbox = test_bbox) %>%
+  add_osm_feature(key = "amenity", value = "restaurant") %>%
+  osmdata_sf()
 
-
-
-
-test_bbox <- c(-119.473572,33.493307,-117.051086,34.633208)
-
-q <- opq(bbox = test_bbox) |>
- add_osm_feature(key = "amenity", value = "restaurant") |>
- osmdata_sf ()
-resturants <- q$osm_points %>% select(name, geometry) %>% filter(!is.na(geometry)) %>%
+restaurants <- q$osm_points %>% 
+  select(name, geometry) %>% 
+  filter(!is.na(geometry)) %>%
   st_coordinates()
+```
+
+```{r figure-5, fig.cap="**Figure 5:** Kernel density estimation of restaurant locations across Los Angeles County. Warmer colors (yellow to white) indicate areas of higher restaurant concentration, highlighting commercial and tourist districts. The visualization uses a two-dimensional density estimation with contour lines to delineate density gradients.", fig.width=10, fig.height=8}
+
+# Convert restaurants dataframe to match coordinate system
+restaurants_df <- data.frame(restaurants) %>%
+  st_as_sf(coords = c("X", "Y"), crs = 4326) %>%
+  st_transform(32611)
+
+restaurants_coords <- st_coordinates(restaurants_df)
 
 p <- ggplot() +
   stat_density_2d_filled(
-    data = resturants,
+    data = as.data.frame(restaurants_coords),
     aes(x = X, y = Y),
     contour_var = "density",
     bins = 15,
     alpha = 0.9,
-    # 'adjust' controls the smoothness. 
-    # If the blobs look too jagged after zooming out, try increasing this (e.g., 1.5)
     adjust = 1 
   ) +
   geom_sf(
@@ -502,52 +453,48 @@ p <- ggplot() +
   theme_void(base_size = 12) +
   theme(
     legend.position = "right",
-    plot.title = element_text(face = "bold", hjust = 0.5, margin = margin(b = 10), color = "white"), # Added color white for visibility
+    plot.title = element_text(face = "bold", hjust = 0.5, margin = margin(b = 10), color = "white"),
     plot.background = element_rect(fill = "black", colour = NA),
     legend.text = element_text(colour = "white"),
     legend.title = element_text(colour = "white")
   )
 
-ggsave(file.path(ddir, "figure5.png"), p, width = 10, height = 8, dpi = 300)
-
+print(p)
 ```
 
-figure 6
-```{r}
-library(sf)
-library(dplyr)
-library(ggplot2)
+# Proximity Analysis: Airbnbs Near Restaurants
 
-restaurants_sf <- q$osm_points %>%
-  select(name, geometry) %>%
-  filter(!is.na(geometry)) %>%
-  st_as_sf()
+```{r figure-6, fig.cap="**Figure 6:** Proximity analysis showing Airbnb listings within 200-meter walking distance of restaurants in Hollywood. Dark blue points represent Airbnbs within the buffer zone (red shaded area), while grey points show listings outside this range. Red triangles mark restaurant locations. The analysis demonstrates the spatial relationship between accommodation and dining amenities.", fig.width=10, fig.height=8}
 
+# Define target neighbourhood
+chosen_neighbourhood <- "Hollywood"
 
 # Filter to neighbourhood
 target_sf <- neighbourhoods_sf %>%
-  filter(neighbourhood == chosen_neighbourhood) %>%
-  st_transform(crs = 32611)
+  filter(neighbourhood == chosen_neighbourhood)
 
-# Get restaurants in that neighbourhood
+# Convert restaurants to sf
+restaurants_sf <- q$osm_points %>%
+  select(name, geometry) %>%
+  filter(!is.na(geometry)) %>%
+  st_as_sf() %>%
+  st_transform(32611)
+
+# Get restaurants in neighbourhood
 target_restaurants <- restaurants_sf %>%
-  st_transform(crs = 32611) %>%
   st_filter(target_sf)
 
 # Create 200m buffers
 restaurant_buffers <- st_buffer(target_restaurants, dist = 200)
 buffer_union <- st_union(restaurant_buffers)
 
-# Get all Airbnbs in neighbourhood
+# Get Airbnbs in neighbourhood
 target_airbnbs <- airbnb_sf %>%
-  st_transform(crs = 32611) %>%
   st_filter(target_sf)
 
-# Find Airbnbs within 200m of restaurants
+# Find Airbnbs within 200m
 airbnbs_near <- target_airbnbs %>%
   filter(lengths(st_intersects(., restaurant_buffers)) > 0)
-
-library(ggspatial)
 
 p <- ggplot() +
   geom_sf(data = target_sf, fill = "#f8f9fa", color = "#495057", linewidth = 0.5) +
@@ -605,84 +552,68 @@ p <- ggplot() +
     legend.box.margin = margin(t = 10)
   )
 
-p
-
+print(p)
 ```
 
+# Point Pattern Analysis
 
-pattern point analysis of airbnb price
+## Kernel Density Estimation
 
-```{r}
+```{r figure-7, fig.cap="**Figure 7:** Kernel density estimation of all Airbnb listings using point pattern analysis. The heatmap reveals clustering patterns with contour lines indicating concentration levels. This analysis employs a Gaussian kernel with 2km bandwidth to smooth the point distribution across the study area.", fig.width=10, fig.height=8}
 
-library(spatstat)
-library(sf)
-
-
-BA_boundary <- st_union(neighbourhoods_sf_transformed)
+# Create boundary
+BA_boundary <- st_union(neighbourhoods_sf)
 BA_owin_m <- as.owin(BA_boundary)
 
-listings_transformed <- airbnb_sf %>%
-  st_transform(32611)
-
-coords <- st_coordinates(listings_transformed)
+# Prepare point pattern
+coords <- st_coordinates(airbnb_sf)
 
 listings_ppp <- ppp(
   x = coords[, 1],
   y = coords[, 2],
-  window = BA_owin_m
-)
-
-listings_ppp <- rescale(listings_ppp, 1000)
-BA_owin <- rescale(BA_owin_m, 1000)
-marks(listings_ppp) <- NULL
-
-# Increase sigma for smoother output (adjust value as needed)
-K1 <- density.ppp(listings_ppp, sigma = 2)
-
-plot(K1, main = "Kernel Density of Airbnb Listings in Los Angeles", las = 1)
-contour(K1, add = TRUE)
-plot(BA_owin, add = TRUE)
-```
-
-
-```{r}
-library(spatstat)
-library(sf)
-
-neighbourhoods_sf_transformed <- neighbourhoods_sf %>% 
-  st_set_crs(4326) %>% 
-  st_transform(32611)
-
-BA_boundary <- st_union(neighbourhoods_sf_transformed)
-BA_owin_m <- as.owin(BA_boundary)
-
-# Prepare listings with price
-listings_transformed <- airbnb_sf %>%
-  st_transform(32611) %>%
-  filter(!is.na(price), price > 0)
-
-coords <- st_coordinates(listings_transformed)
-
-# Create ppp with price as marks
-listings_ppp <- ppp(
-  x = coords[, 1],
-  y = coords[, 2],
-  marks = listings_transformed$price,
   window = BA_owin_m
 )
 
 # Rescale to km
 listings_ppp <- rescale(listings_ppp, 1000)
 BA_owin <- rescale(BA_owin_m, 1000)
+marks(listings_ppp) <- NULL
 
-# IDW interpolation using Smooth.ppp
-# sigma controls smoothing, inverse.weights gives IDW behaviour
-price_idw <- Smooth.ppp(listings_ppp, sigma = 2)
+# Calculate density
+K1 <- density.ppp(listings_ppp, sigma = 2)
+
+# Plot
+plot(K1, main = "Kernel Density of Airbnb Listings in Los Angeles", las = 1)
+contour(K1, add = TRUE)
+plot(BA_owin, add = TRUE)
+```
+
+## Inverse Distance Weighted Interpolation of Prices
+
+```{r figure-8, fig.cap="**Figure 8:** Inverse distance weighted (IDW) interpolation of Airbnb prices across Los Angeles County. The continuous surface estimation uses listing prices as marks, with colors representing interpolated price values. Warmer colors indicate higher predicted prices, revealing spatial price trends and hotspots. The IDW method weights nearby observations more heavily, creating a smooth price surface.", fig.width=10, fig.height=8}
+
+# Prepare listings with price marks
+listings_transformed <- airbnb_sf %>%
+  filter(!is.na(price), price > 0)
+
+coords_price <- st_coordinates(listings_transformed)
+
+# Create ppp with price marks
+listings_ppp_price <- ppp(
+  x = coords_price[, 1],
+  y = coords_price[, 2],
+  marks = listings_transformed$price,
+  window = BA_owin_m
+)
+
+# Rescale to km
+listings_ppp_price <- rescale(listings_ppp_price, 1000)
+
+# IDW interpolation
+price_idw <- Smooth.ppp(listings_ppp_price, sigma = 2)
 
 # Plot
 plot(price_idw, main = "IDW Interpolation of Airbnb Prices in Los Angeles", las = 1)
 contour(price_idw, add = TRUE)
 plot(BA_owin, add = TRUE)
-
-
 ```
