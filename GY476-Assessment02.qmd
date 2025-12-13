@@ -9,14 +9,15 @@ output:
 
 # Setup and Data Loading
 
-```{r setup, include=FALSE}
+Setup and Data Loading In this section, I complete the basic setup for the assessment, such as setting my working directory and creating a data directory for organised and structured file management. I also configure the API key through a .Renviron file for secure access to the American community Survey data.
+
+```{r setup, include=TRUE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, 
                       fig.align = 'center', fig.width = 12, fig.height = 8)
+if(!require("wordcountaddin")) remotes::install_github("benmarwick/wordcountaddin")
+word_count(filename = this_filename())
 
-# Set working directory
 wdir <- "/Users/dylanhillier/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/GY476_Geographic_Information_System/assessment02"
-
-# Load required packages
 library(tidyverse)
 library(ggplot2)
 library(dplyr)
@@ -28,19 +29,18 @@ library(osmdata)
 library(ggspatial)
 library(spatstat)
 
-# Create data directory
 ddir <- file.path(wdir, "data")
 if(!dir.exists(ddir)) dir.create(ddir)
 
-# Census API key - load from environment variable for security
 # To set up: Add CENSUS_API_KEY=your_key_here to your .Renviron file
-# Or use: Sys.setenv(CENSUS_API_KEY = "your_key_here") in your R console
 api_key <- Sys.getenv("CENSUS_API_KEY")
 if(api_key == "") {
   stop("Census API key not found. Please set CENSUS_API_KEY environment variable.")
 }
 census_api_key(api_key, install = TRUE, overwrite = TRUE)
 ```
+
+Downloading Airbnb listing(listing.csv) and neighbourhood boundaries from Inside Airbnb for September 2025 snapshot, loaded pre-processed ACS 2019-2023 census data and census tract geometries from the provided geopackage. Additionally, we set bbox ranges, which define the area we are going to examine for the mainland and the islands of Catalina.
 
 ```{r download-data, include=FALSE}
 # Download Airbnb listings
@@ -58,9 +58,8 @@ if(!file.exists(file.path(ddir, "neighbourhoods.geojson"))) {
     destfile = file.path(ddir, "neighbourhoods.geojson")
   )
 }
-```
 
-```{r load-data, include=FALSE}
+
 # Airbnb listings
 airbnb_raw <- read.csv(file.path(ddir, "listing.csv"))
 
@@ -95,6 +94,8 @@ census_joined <- census_tracts_sf %>%
   left_join(census_data, by = "GEOID")
 ```
 
+Applied IQR-Based outlier removal for Airbnb prices: filtering outside the IQRx1.5 from Q1 and Q3 to improve visualisation. Reducing distortion from extreme luxury proporties. Additionally I am also standardising all CRS systems to 32611 which is critically measured in meters, important for this analysis.
+
 ```{r prepare-airbnb, include=FALSE}
 # Calculate IQR bounds for outlier removal
 Q1 <- quantile(airbnb_raw$price, 0.25, na.rm = TRUE)
@@ -115,9 +116,11 @@ airbnb_sf <- airbnb_raw %>%
 
 # Spatial Distribution of Airbnb Listings
 
+Split Airbnb listing into two categories: "Entire home/apt" versus combined "hotel room/private room/ Shared room" for a comparative analysis. Creating a dual-panel map with tmap visualisation, featuring mainland maps and Catalina Island map insets for comprehensive geographical coverage. Using a consistent dot size(0.05) and 50% transparency to allow for contrasting colours and distinguish room types. A scale bar (15km) and north arrow for spatial reference and professional cartographic standards. Revealing concentration patterns: entire homes clustered heavily in the coastal/central tourist one, while private/shared rooms showed more even distribution.
+
 ```{r figure-1, fig.cap="**Figure 1:** Spatial distribution of Airbnb listings in Los Angeles County by room type. Left panel shows entire home/apartment listings concentrated in coastal and central areas. Right panel displays hotel rooms, private rooms, and shared rooms with similar geographic patterns but lower densities.", fig.width=14, fig.height=8}
 
-# Split by room type
+
 airbnb_entire <- airbnb_sf %>%
   filter(room_type == "Entire home/apt")
 
@@ -177,20 +180,19 @@ popViewport()
 
 # Mean Airbnb Prices by Census Tract
 
-```{r figure-2, fig.cap="**Figure 2:** Choropleth map showing mean Airbnb prices aggregated by census tract. Golden triangles indicate the three highest-priced tracts (concentrated in coastal areas), while red circles mark the three lowest-priced tracts. Color intensity reflects price gradient from yellow (lower) to red (higher).", fig.width=12, fig.height=10}
+Performed a spatial join between Airbnb point data and census tract polygons to aggregate listings by administrative boundaries while dealing with NA values. Additionally, identified top 3 highest and the bottom three lowest price areas for annotation. Using markers to highlight extreme values. The use of Yellow - orange - red colour scheme with continuous classification to highlight price change. THe legend is placed externally to avoid obscuring map data while maintaining readability.
 
-# Calculate mean price per census tract
+```{r figure-2, fig.cap="**Figure 2:** Choropleth map showing mean Airbnb prices aggregated by census tract. Golden triangles indicate the three highest-priced tracts (concentrated in coastal areas), while red circles mark the three lowest-priced tracts. Colour intensity reflects price gradient from yellow (lower) to red (higher).", fig.width=12, fig.height=10}
+
 tract_prices <- airbnb_sf %>%
   st_join(census_tracts_sf) %>%
   st_drop_geometry() %>%
   group_by(GEOID) %>%
   summarise(mean_price = mean(price, na.rm = TRUE), .groups = 'drop')
 
-# Join prices back to census tract geometry
 tracts_with_prices <- census_tracts_sf %>%
   left_join(tract_prices, by = "GEOID")
 
-# Identify top 3 and bottom 3 tracts by price
 all_highlight <- tracts_with_prices %>%
   filter(!is.na(mean_price)) %>%
   mutate(price_rank = rank(-mean_price, ties.method = "first")) %>%
@@ -264,7 +266,9 @@ print(inset_choropleth, vp = viewport(x = 0.87, y = 0.145, width = 0.25, height 
 
 # Socio-Economic Characteristics
 
-```{r figure-3-data, include=FALSE}
+Get renter occupancy data via tidycensus package using ACS variable B25003 for 2023. Then calculated percentage of renter occupied units (renter_occupied/total_units)x100 for each census tract. Join median household income data from provided ACS data to census tract geomtries. Create a two panel comparative choropleth using contrasting colour schemes: YlOrRd for rental percentages(intensity based) and GnBU for income. Positioned legends horizontally beneath maps to maximize space while ensuring colour-blind accessability. with a Continous colour scale.
+
+```{r figure-3-data}
 # Get renter data from tidycensus
 renter_data <- get_acs(
   state = "CA",
@@ -362,8 +366,8 @@ popViewport()
 ```
 
 # Bivariate Analysis: Price and Rental Patterns
-
-```{r figure-4, fig.cap="**Figure 4:** Bivariate choropleth map examining the relationship between log-transformed Airbnb prices and percentage of renter-occupied housing. The purple-gold color scheme simultaneously displays both variables, revealing areas where high rental rates coincide with elevated Airbnb prices.", fig.width=10, fig.height=10}
+We start by spatially joining renter occupancy and Airbnb price data at census level. Using an applied natural logarithum transformation to prices(log(price)) to normalise right skewed distribution and model non-linear relationships linearly. The use of the purple - gold bivariate colour schem where axes represent Ln(price) and percentage renter simultaniously. Purple indicate high rental/low prices(vulnerable residential area); gold shows low renter/high prices(tourist zones); dark gold reveals displacement hotspots(high renter AND high prices). Focused analysis on mainland LA using defined bounding box to emphasize critical urban core.
+```{r figure-4, fig.cap="**Figure 4:** Bivariate choropleth map examining the relationship between the natual logorithum of Airbnb prices and percentage of renter-occupied housing. The purple-gold color scheme simultaneously displays both variables, revealing areas where high rental rates coincide with elevated Airbnb prices.", fig.width=10, fig.height=10}
 
 # Join renter and price data
 summary_sf <- st_join(renter_sf, airbnb_sf, join = st_intersects)
@@ -400,8 +404,8 @@ figure_4_bivariate
 ```
 
 # Restaurant Density Analysis
-
-```{r figure-5-data, include=FALSE, cache=TRUE}
+Loading open Street map data, creating a new bbox for while using the osm package to access open street map data.
+```{r figure-5-data, cache=TRUE}
 # Query OpenStreetMap for restaurants
 test_bbox <- c(-119.473572, 33.493307, -117.051086, 34.633208)
 
@@ -414,6 +418,8 @@ restaurants <- q$osm_points %>%
   filter(!is.na(geometry)) %>%
   st_coordinates()
 ```
+
+In this section I used open street maps to 
 
 ```{r figure-5, fig.cap="**Figure 5:** Kernel density estimation of restaurant locations across Los Angeles County. Warmer colors (yellow to white) indicate areas of higher restaurant concentration, highlighting commercial and tourist districts. The visualization uses a two-dimensional density estimation with contour lines to delineate density gradients.", fig.width=10, fig.height=8}
 
@@ -557,17 +563,18 @@ print(p)
 
 # Point Pattern Analysis
 
-## Kernel Density Estimation
+```{r figure-7-8-combined, fig.cap="**Figure 7:** Spatial analysis of Airbnb listings in Los Angeles. (a) Kernel density estimation using point pattern analysis with a Gaussian kernel (2km bandwidth) showing clustering patterns with contour lines indicating concentration levels. (b) Inverse distance weighted (IDW) interpolation of listing prices creating a continuous surface where warmer colors indicate higher predicted prices, revealing spatial price trends and hotspots.", fig.width=14, fig.height=7}
 
-```{r figure-7, fig.cap="**Figure 7:** Kernel density estimation of all Airbnb listings using point pattern analysis. The heatmap reveals clustering patterns with contour lines indicating concentration levels. This analysis employs a Gaussian kernel with 2km bandwidth to smooth the point distribution across the study area.", fig.width=10, fig.height=8}
+# Set up two-panel plot
+par(mfrow = c(1, 2))
 
+# Panel (a): Kernel Density Estimation
 # Create boundary
 BA_boundary <- st_union(neighbourhoods_sf)
 BA_owin_m <- as.owin(BA_boundary)
 
 # Prepare point pattern
 coords <- st_coordinates(airbnb_sf)
-
 listings_ppp <- ppp(
   x = coords[, 1],
   y = coords[, 2],
@@ -583,15 +590,11 @@ marks(listings_ppp) <- NULL
 K1 <- density.ppp(listings_ppp, sigma = 2)
 
 # Plot
-plot(K1, main = "Kernel Density of Airbnb Listings in Los Angeles", las = 1)
+plot(K1, main = "(a) Kernel Density of Airbnb Listings", las = 1)
 contour(K1, add = TRUE)
 plot(BA_owin, add = TRUE)
-```
 
-## Inverse Distance Weighted Interpolation of Prices
-
-```{r figure-8, fig.cap="**Figure 8:** Inverse distance weighted (IDW) interpolation of Airbnb prices across Los Angeles County. The continuous surface estimation uses listing prices as marks, with colors representing interpolated price values. Warmer colors indicate higher predicted prices, revealing spatial price trends and hotspots. The IDW method weights nearby observations more heavily, creating a smooth price surface.", fig.width=10, fig.height=8}
-
+# Panel (b): IDW Interpolation
 # Prepare listings with price marks
 listings_transformed <- airbnb_sf %>%
   filter(!is.na(price), price > 0)
@@ -613,7 +616,153 @@ listings_ppp_price <- rescale(listings_ppp_price, 1000)
 price_idw <- Smooth.ppp(listings_ppp_price, sigma = 2)
 
 # Plot
-plot(price_idw, main = "IDW Interpolation of Airbnb Prices in Los Angeles", las = 1)
+plot(price_idw, main = "(b) IDW Interpolation of Prices", las = 1)
 contour(price_idw, add = TRUE)
 plot(BA_owin, add = TRUE)
+
+# Reset plotting parameters
+par(mfrow = c(1, 1))
+```
+
+```{r}
+# Download Red/Purple Line data
+url_metro <- "https://developer.metro.net/wp-content/uploads/2019/10/802_Red_Purple_Track_0316.zip"
+url_station <- "https://developer.metro.net/wp-content/uploads/2019/10/802_805_RedPurple_Stations_0316.zip"
+
+if(!file.exists(file.path(ddir,"red-purple-line"))){
+  download.file(url = url_metro, destfile = file.path(ddir, "red-purple-line.zip"))
+  unzip(file.path(ddir, "red-purple-line.zip"), exdir = file.path(ddir, 'red-purple-line'))
+}
+
+if(!file.exists(file.path(ddir,"red-purple-stations"))){
+  download.file(url = url_station, destfile = file.path(ddir, "red-purple-stations.zip"))
+  unzip(file.path(ddir, "red-purple-stations.zip"), exdir = file.path(ddir, 'red-purple-stations'))
+}
+
+# Read and transform data
+red_purple_line_sf <- st_read(file.path(ddir, "red-purple-line/802_805_Track_0316.shp")) %>% 
+  st_transform(32611)
+
+station <- st_read(file.path(ddir, "red-purple-stations/RedPurpleLine0316.shp")) %>% 
+  select(STATION, geometry) %>% 
+  st_transform(32611)
+
+# Create 400m buffers around stations
+station_buffers <- st_buffer(station, dist = 400)
+
+# Spatial join to count Airbnb listings within buffers
+airbnb_near_redpurple <- st_join(airbnb_sf, station_buffers, left = FALSE) %>%
+  st_drop_geometry()
+
+# Count listings per station
+station_counts <- airbnb_near_redpurple %>%
+  group_by(STATION) %>%
+  summarise(n_airbnb = n()) %>%
+  ungroup()
+
+# Join counts back to station data
+station_with_counts <- station %>%
+  left_join(station_counts, by = "STATION") %>%
+  mutate(n_airbnb = replace_na(n_airbnb, 0))
+
+# Identify vulnerable census tracts (>50% renters) along the Red/Purple Line
+redpurple_corridor <- st_buffer(red_purple_line_sf, dist = 1000) %>% st_union()
+
+vulnerable_tracts_redpurple <- renter_sf %>%
+  filter(pct_renter > 50) %>%
+  st_filter(redpurple_corridor, .predicate = st_intersects)
+
+# Filter to key neighborhoods for context
+key_neighborhoods <- neighbourhoods_sf %>%
+  filter(neighbourhood %in% c("Hollywood", "Koreatown", "Downtown", 
+                               "West Hollywood", "Silver Lake", "Echo Park",
+                               "Venice", "Santa Monica", "Beverly Hills",
+                               "Westwood", "Mid-City"))
+
+# Create main Figure 8
+fig8_main <- ggplot() +
+  # Vulnerable census tracts in background
+  geom_sf(data = vulnerable_tracts_redpurple, 
+          aes(fill = pct_renter), 
+          color = "grey80", alpha = 0.5) +
+  scale_fill_distiller(palette = "YlOrRd", direction = 1,
+                       name = "% Renter\nOccupied",
+                       limits = c(50, 100)) +
+  
+  # Add neighborhood boundaries for context (NO LABELS)
+  geom_sf(data = key_neighborhoods,
+          fill = NA, color = "grey30", linewidth = 0.8, linetype = "solid") +
+  
+  # Station buffers
+  geom_sf(data = station_buffers, 
+          fill = NA, color = "#E31837", 
+          linetype = "dashed", linewidth = 0.5, alpha = 0.6) +
+  
+  # Red/Purple Line route
+  geom_sf(data = red_purple_line_sf, 
+          color = "#E31837", linewidth = 1.5) +
+  
+  # Airbnb points within buffers
+  geom_sf(data = airbnb_sf %>% st_filter(station_buffers),
+          color = "gold", size = 0.5, alpha = 0.4) +
+  
+  # Stations sized by Airbnb count
+  geom_sf(data = station_with_counts,
+          aes(size = n_airbnb), 
+          color = "darkred", alpha = 0.8, shape = 16) +
+  scale_size_continuous(name = "Airbnb\nListings\nwithin 400m",
+                        range = c(2, 8),
+                        breaks = c(0, 100, 200, 300, 400, 500)) +
+  
+  # Add scale bar and north arrow
+  annotation_scale(
+    location = "br",
+    width_hint = 0.15,
+    style = "ticks",
+    line_width = 0.5,
+    height = unit(0.15, "cm"),
+    pad_x = unit(0.5, "cm"),
+    pad_y = unit(0.5, "cm")
+  ) +
+  annotation_north_arrow(
+    location = "tr",
+    which_north = "true",
+    height = unit(1, "cm"),
+    width = unit(1, "cm"),
+    pad_x = unit(0.5, "cm"),
+    pad_y = unit(0.5, "cm"),
+    style = north_arrow_fancy_orienteering
+  ) +
+  
+  # Styling
+  theme_void() +
+  theme(
+    legend.position = "right",
+    legend.background = element_rect(fill = "white", color = "grey50"),
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
+    plot.subtitle = element_text(hjust = 0.5, color = "grey40", margin = margin(t = 5, b = 10)),
+    plot.caption = element_text(hjust = 0.5, color = "grey50", size = 8),
+    plot.margin = margin(15, 15, 15, 15)
+  ) +
+  labs(
+    title = "Airbnb Clustering Along the Red/Purple Line",
+    subtitle = "Transit-oriented displacement in Hollywood, Koreatown, and Downtown",
+    caption = "Data: Inside Airbnb, LA Metro, ACS 2019-2023 | CRS: EPSG 32611"
+  )
+
+# Create inset overview map
+inset_overview <- ggplot() +
+  geom_sf(data = census_tracts_sf, fill = "grey90", color = "grey80", linewidth = 0.1) +
+  geom_sf(data = red_purple_line_sf, color = "#E31837", linewidth = 2) +
+  geom_sf(data = vulnerable_tracts_redpurple, fill = "#E31837", alpha = 0.3, color = NA) +
+  theme_void() +
+  theme(
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+
+# Print with inset (similar to your Figure 1 and 2 approach)
+grid.newpage()
+print(fig8_main, vp = viewport(x = 0.5, y = 0.5, width = 1, height = 1))
+print(inset_overview, vp = viewport(x = 0.15, y = 0.22, width = 0.25, height = 0.25))
 ```
