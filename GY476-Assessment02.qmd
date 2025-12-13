@@ -14,8 +14,8 @@ Setup and Data Loading In this section, I complete the basic setup for the asses
 ```{r setup, include=TRUE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, 
                       fig.align = 'center', fig.width = 12, fig.height = 8)
-if(!require("wordcountaddin")) remotes::install_github("benmarwick/wordcountaddin")
-word_count(filename = this_filename())
+
+
 
 wdir <- "/Users/dylanhillier/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/GY476_Geographic_Information_System/assessment02"
 library(tidyverse)
