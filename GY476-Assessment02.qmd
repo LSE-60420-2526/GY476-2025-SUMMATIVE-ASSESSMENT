@@ -404,7 +404,7 @@ figure_4_bivariate
 ```
 
 # Restaurant Density Analysis
-Loading open Street map data, creating a new bbox for while using the osm package to access open street map data.
+Loading open Street map data, creating a new bbox for LA country. 
 ```{r figure-5-data, cache=TRUE}
 # Query OpenStreetMap for restaurants
 test_bbox <- c(-119.473572, 33.493307, -117.051086, 34.633208)
@@ -419,7 +419,8 @@ restaurants <- q$osm_points %>%
   st_coordinates()
 ```
 
-In this section I used open street maps to 
+In this section I used open street maps to filter for amenitiy="resturant" feature to extract point geometries and transform to UTM32611. I then used kernal density estimation using the function stat_density_2d_filled with 15 contour bits with a viridis colour scheme with an overlay of neighbourhood boundaries without overwhelming density surface. 
+
 
 ```{r figure-5, fig.cap="**Figure 5:** Kernel density estimation of restaurant locations across Los Angeles County. Warmer colors (yellow to white) indicate areas of higher restaurant concentration, highlighting commercial and tourist districts. The visualization uses a two-dimensional density estimation with contour lines to delineate density gradients.", fig.width=10, fig.height=8}
 
@@ -469,7 +470,7 @@ print(p)
 ```
 
 # Proximity Analysis: Airbnbs Near Restaurants
-
+Selecting Hollywood neighbourhood from neighbourhood.geojson for analysis based on highest tourist activity and amentiy density, the filered for resturants and airbnb listings to hollywood boundary using st_filter spatial predicate. Created 200 metre buffer around each resturant point representing comfortable walking distance. Identified overlapping buffers by using st_union to create continuous accessiblity zone, then performed a spatial intersection with st_intersect to identify listings within resturant buffers. 
 ```{r figure-6, fig.cap="**Figure 6:** Proximity analysis showing Airbnb listings within 200-meter walking distance of restaurants in Hollywood. Dark blue points represent Airbnbs within the buffer zone (red shaded area), while grey points show listings outside this range. Red triangles mark restaurant locations. The analysis demonstrates the spatial relationship between accommodation and dining amenities.", fig.width=10, fig.height=8}
 
 # Define target neighbourhood
@@ -562,7 +563,7 @@ print(p)
 ```
 
 # Point Pattern Analysis
-
+I started by converting census tract geometries to owin spatial objects windows for spatstat compatibility. Then extracted coordinates from airbnb sf object and create point pattern(ppp) with defined window boundary. Rescaled coordinates from metres to kilometers for appropriate bandwidth specification.
 ```{r figure-7-8-combined, fig.cap="**Figure 7:** Spatial analysis of Airbnb listings in Los Angeles. (a) Kernel density estimation using point pattern analysis with a Gaussian kernel (2km bandwidth) showing clustering patterns with contour lines indicating concentration levels. (b) Inverse distance weighted (IDW) interpolation of listing prices creating a continuous surface where warmer colors indicate higher predicted prices, revealing spatial price trends and hotspots.", fig.width=14, fig.height=7}
 
 # Set up two-panel plot
@@ -624,6 +625,8 @@ plot(BA_owin, add = TRUE)
 par(mfrow = c(1, 1))
 ```
 
+# Figure 8: Transit Oriented Displacement
+I downloaded the LA Metro Red/Purple Line data from the Metro website, which included both the train tracks and station locations, then changed everything to use the same coordinate system (UTM Zone 11N) as the rest of my project. I created 400-metre circles around each station to show the area people can easily walk to from the station. I then counted how many Airbnb listings were inside each of these circles by joining the station buffers with the Airbnb data. I added these counts back to the station data so I could show them on the map using different sized circles, where bigger circles mean more Airbnb listings near that station. I found the vulnerable neighborhoods by looking for census tracts where more than 50% of people rent rather than own their homes, since these areas are more likely to lose housing when landlords switch to short-term rentals. I created a 1km-wide zone along the entire train line to show the area influenced by the transit system. I then filtered to only show the vulnerable tracts that fall within this transit zone, which shows where high numbers of renters live close to the metro stations. I selected several key neighborhoods like Hollywood, Koreatown, Downtown, West Hollywood, and others to show their boundaries on the map for context. I built the map in layers, starting with the vulnerable tracts shown in yellow-orange-red colors based on the percentage of renters, then adding neighborhood outlines in grey, station circles as dashed red lines, and the train route as a solid red line. I added the Airbnb listings as small gold dots, but only showed the ones near stations to keep the map clear. I showed each station as a dark red circle where the size shows how many Airbnbs are nearby, ranging from very small (0 listings) to large (500+ listings). I added a scale bar at the bottom and a north arrow at the top to help people read the map properly. I created a small overview map in the corner showing where the Red/Purple Line sits within all of LA County, using grey for the background and red to highlight the train line and vulnerable areas. The map shows that the biggest clusters of Airbnbs are at Hollywood (over 100 listings), Koreatown (90-100 listings), and downtown (80-100 listings), all in areas where most people rent their homes, while stations at the ends of the line have far fewer Airbnbs, suggesting that being in the city center matters more than just having a train station nearby.
 ```{r}
 # Download Red/Purple Line data
 url_metro <- "https://developer.metro.net/wp-content/uploads/2019/10/802_Red_Purple_Track_0316.zip"
