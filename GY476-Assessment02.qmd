@@ -7,113 +7,63 @@ output:
     theme: cosmo
     echo: false
 ---
+
 ## Introduction
 This report examines Los Angeles through two datasets: Airbnb listings and the American Community Survey (ACS). As a popular tourist destination, LA experiences high demand for short-term rentals, which reduces the supply of houses on the market, creating a ‘rental gap’ where short-term rentals are more profitable than long-term ones, thereby inducing gentrification and pricing out locals (Wachsmuth and Weisler, 2018). Data compiled from Airbnb’s website includes listing information alongside other variables such as price. The ACS captures poverty rates, socioeconomic disparities, and wealth inequality, offering insights into Los Angeles’s high levels of inequality (Bohn and Thorman, 2025). This spatial analysis examines the distribution of Airbnb listings and their relationship to key socioeconomic variables through a rent gap lens, informing policy decisions aimed at addressing the housing crisis in Los Angeles and alleviating homelessness (Nowell, 2025; The Economist, 2025).
 
-## Setup and Data Loading
-
-Setup and Data Loading in this section, I complete the basic setup for the assessment, such as setting my working directory and creating a data directory, and loading all the relivent packages needed. Organised and structured file management so it can later be reproduced. Additionally, I have also secured my API key through a .Renviron file for secure access to the American Community Survey data.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, 
                       fig.align = 'center', fig.width = 12, fig.height = 8)
 
-
 wdir <- "/Users/dylanhillier/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/GY476_Geographic_Information_System/assessment02"
-library(tidyverse)
-library(ggplot2)
-library(dplyr)
-library(sf)
-library(tmap)
-library(tidycensus)
-library(grid)
-library(osmdata)
-library(ggspatial)
-library(spatstat)
+library(tidyverse); library(sf); library(tmap); library(tidycensus)
+library(grid); library(osmdata); library(ggspatial); library(spatstat)
 
 ddir <- file.path(wdir, "data")
 if(!dir.exists(ddir)) dir.create(ddir)
 
-# To set up: Add CENSUS_API_KEY=your_key_here to your .Renviron file
 api_key <- Sys.getenv("CENSUS_API_KEY")
-if(api_key == "") {
-  stop("Census API key not found. Please set CENSUS_API_KEY environment variable.")
-}
+if(api_key == "") stop("Census API key not found.")
 census_api_key(api_key, install = TRUE, overwrite = TRUE)
 ```
 
-Downloading Airbnb listing(listing.csv) and neighbourhood boundaries from Inside Airbnb for September 2025 snapshot, loaded pre-processed ACS 2019-2023 census data and census tract geometries from the provided geopackage. Saving these file into the relivent data directory. Additionally, we set bbox ranges, which define the area we are going to examine for the mainland and the islands of Catalina. After extracting data from the relivent sources, I used st_transform to set the crs to 32611.
 
 ```{r download-data, include=FALSE}
-# Download Airbnb listings
-if(!file.exists(file.path(ddir, "listing.csv"))) {
-  download.file(
-    url = "https://data.insideairbnb.com/united-states/ca/los-angeles/2025-09-01/visualisations/listings.csv",
-    destfile = file.path(ddir, "listing.csv")
-  )
+# Download data if not exists
+urls <- list(
+  listing = "https://data.insideairbnb.com/united-states/ca/los-angeles/2025-09-01/visualisations/listings.csv",
+  neighbourhoods = "https://data.insideairbnb.com/united-states/ca/los-angeles/2025-09-01/visualisations/neighbourhoods.geojson"
+)
+for(f in names(urls)) {
+  dest <- file.path(ddir, paste0(ifelse(f=="listing","listing.csv","neighbourhoods.geojson")))
+  if(!file.exists(dest)) download.file(urls[[f]], dest)
 }
 
-# Download neighbourhood boundaries
-if(!file.exists(file.path(ddir, "neighbourhoods.geojson"))) {
-  download.file(
-    url = "https://data.insideairbnb.com/united-states/ca/los-angeles/2025-09-01/visualisations/neighbourhoods.geojson",
-    destfile = file.path(ddir, "neighbourhoods.geojson")
-  )
-}
-
-
-# Airbnb listings
+# Load all data
 airbnb_raw <- read.csv(file.path(ddir, "listing.csv"))
-
-# Neighbourhood boundaries
-neighbourhoods_sf <- st_read(file.path(ddir, "neighbourhoods.geojson"), quiet = TRUE) %>%
-  st_set_crs(4326) %>%
-  st_transform(32611)
-
-# LA census tract geometry
-census_tracts_sf <- st_read(file.path(ddir, "LA_geometry.gpkg"), quiet = TRUE) %>%
-  st_transform(32611) %>%
-  st_make_valid()
-
-# Census data
+neighbourhoods_sf <- st_read(file.path(ddir, "neighbourhoods.geojson"), quiet=TRUE) %>% st_set_crs(4326) %>% st_transform(32611)
+census_tracts_sf <- st_read(file.path(ddir, "LA_geometry.gpkg"), quiet=TRUE) %>% st_transform(32611) %>% st_make_valid()
 census_data <- read.csv(file.path(ddir, "ACS_2019_2023_LA_vars.csv")) %>%
-  mutate(
-    GEOID = as.character(GEOID),
-    GEOID = paste0("06", str_sub(GEOID, start = 2))
-  )
+  mutate(GEOID = paste0("06", str_sub(as.character(GEOID), start = 2)))
 
-# Define bounding boxes
-mainland_bbox <- st_bbox(c(xmin = 320000, ymin = 3710000, 
-                           xmax = 445000, ymax = 3860000), 
-                         crs = 32611)
-
-catalina_bbox <- st_bbox(c(xmin = 340000, ymin = 3678000, 
-                           xmax = 390000, ymax = 3708000), 
-                         crs = 32611)
-
-# Join census data
-census_joined <- census_tracts_sf %>%
-  left_join(census_data, by = "GEOID")
+# Bounding boxes
+mainland_bbox <- st_bbox(c(xmin=320000, ymin=3710000, xmax=445000, ymax=3860000), crs=32611)
+catalina_bbox <- st_bbox(c(xmin=340000, ymin=3678000, xmax=390000, ymax=3708000), crs=32611)
+census_joined <- census_tracts_sf %>% left_join(census_data, by="GEOID")
 ```
 
-Applied IQR-Based outlier removal for Airbnb prices: filtering outside the IQRx1.5 from Q1 and Q3 to improve visualisation. Reducing distortion from extreme luxury proporties. Additionally I am also standardising all CRS systems to 32611 which is critically measured in meters, important for this analysis.
+
 
 ```{r prepare-airbnb, include=FALSE}
-# Calculate IQR bounds for outlier removal
-Q1 <- quantile(airbnb_raw$price, 0.25, na.rm = TRUE)
-Q3 <- quantile(airbnb_raw$price, 0.75, na.rm = TRUE)
+Q1 <- quantile(airbnb_raw$price, 0.25, na.rm=TRUE)
+Q3 <- quantile(airbnb_raw$price, 0.75, na.rm=TRUE)
 IQR_val <- Q3 - Q1
 
-# Filter outliers and convert to sf object
 airbnb_sf <- airbnb_raw %>%
-  filter(
-    price >= (Q1 - 1.5 * IQR_val) & 
-    price <= (Q3 + 1.5 * IQR_val)
-  ) %>%
+  filter(price >= (Q1 - 1.5*IQR_val) & price <= (Q3 + 1.5*IQR_val)) %>%
   st_as_sf(coords = c("longitude", "latitude")) %>%
-  st_set_crs(4326) %>%      
-  st_transform(32611) %>%
-  st_make_valid()
+  st_set_crs(4326) %>% st_transform(32611) %>% st_make_valid()
 ```
 
 # Section A
@@ -121,657 +71,287 @@ airbnb_sf <- airbnb_raw %>%
 Airbnb data is publicly available and readily accessible via web scraping, providing a snapshot (specifically for September in Los Angeles) of Airbnb listings and prices in specific areas. The use of point-level geographic coordinates allows for spatial plotting alongside details like price, room type, availability, and reviews. It covers the entire LA metro area and Santa Catalina Island. However, there are limitations: it is not official Airbnb data but collated information. It also lacks key details such as actual booking prices (since it shows listed prices), fees or discounts, and private or unlisted properties. Additionally, it offers only a snapshot in time, neglecting seasonal variations common in Los Angeles. Lastly, since data is reported by hosts, there is a risk of unreliability or false information. 
 Examining American Community Survey (ACS) data, it provides 5-year estimates (2019-2023) across various factors. While it has many strengths, such as being official government statistics offering detailed demographic, economic, and housing data, including a margin of error indicating uncertainty- it also has limitations.. However, 5-year averages can reduce reliability for current conditions. Since the data are aggregated at the tract level, we cannot observe smaller subdivisions, meaning tract averages do not reflect individual circumstances within each tract. Furthermore, as it is self-reported, it may include biases or inaccuracies from respondents. Listings with prices outside 1.5 × IQR from the quartiles were removed as outliers because they could misrepresent certain areas. Extremely high prices on rare luxury properties might not be typical of an area, potentially distorting visualisations and statistical summaries, and failing to accurately reflect the usual Airbnb markets. Finally, regarding the coordinate reference system (CRS), I have chosen UTM Zone 11N (EPSG:32611), since it uses metres, making measurements easier, covers all of Los Angeles with minimal distortion, and is well-suited for distance and area calculations. It is also commonly used in academic research. The reason WGS84 wasn’t used was partly because it is in degrees, which is less accurate for measuring distance.
 
-## Question 2: Spatial Distribution of Airbnb Listings
-### Discription
-Split Airbnb listing into two categories: "Entire home/apt" versus combined "hotel room/private room/ Shared room" for a comparative analysis. Creating a dual-panel map with tmap visualisation, featuring mainland maps and Catalina Island map insets for comprehensive geographical coverage. Using a consistent dot size(0.05) and 50% transparency to allow for contrasting colours and distinguish room types. A scale bar (15km) and north arrow for spatial reference and professional cartographic standards. Revealing concentration patterns: entire homes clustered heavily in the coastal/central tourist one, while private/shared rooms showed more even distribution.
+## Question 2: Spatial Distribution of Airbnb Listings	
 
 
-
-```{r figure-1, fig.cap="**Figure 1:** Spatial distribution of Airbnb listings in Los Angeles County by room type. Left panel shows entire home/apartment listings concentrated in coastal and central areas. Right panel displays hotel rooms, private rooms, and shared rooms with similar geographic patterns but lower densities.", fig.width=14, fig.height=8, echo=FALSE }
-
-
-airbnb_entire <- airbnb_sf %>%
-  filter(room_type == "Entire home/apt")
-
-airbnb_other <- airbnb_sf %>%
-  filter(room_type %in% c("Hotel room", "Private room", "Shared room"))
-
+```{r figure-1, fig.cap="**Figure 1:** Spatial distribution of Airbnb listings in Los Angeles County by room type.", fig.width=14, fig.height=8}
+airbnb_entire <- airbnb_sf %>% filter(room_type == "Entire home/apt")
+airbnb_other <- airbnb_sf %>% filter(room_type %in% c("Hotel room", "Private room", "Shared room"))
 tmap_mode("plot")
 
-# Panel 1: Entire Home/Apartment
-main_entire <- tm_shape(census_tracts_sf, bbox = mainland_bbox) +
-  tm_borders(col = "grey70", lwd = 0.3) +
-  tm_shape(airbnb_entire) +
-  tm_dots(fill = "darkblue", size = 0.05, fill_alpha = 0.5) +
-  tm_title("Entire Home/Apartment", fontface = "bold", size = 1.2) +
-  tm_scalebar(position = c("left", "bottom"), width = 15) +
-  tm_compass(type = "arrow", position = c("right", "top"), size = 2.4) +
-  tm_layout(frame = TRUE)
+# Helper function for main and inset maps
+make_panel <- function(data, color, title) {
+  main <- tm_shape(census_tracts_sf, bbox=mainland_bbox) + tm_borders(col="grey70", lwd=0.3) +
+    tm_shape(data) + tm_dots(fill=color, size=0.05, fill_alpha=0.5) +
+    tm_title(title, fontface="bold", size=1.2) +
+    tm_scalebar(position=c("left","bottom"), width=15) +
+    tm_compass(type="arrow", position=c("right","top"), size=2.4) + tm_layout(frame=TRUE)
+  inset <- tm_shape(census_tracts_sf, bbox=catalina_bbox) + tm_fill(fill="grey95") +
+    tm_borders(col="grey70", lwd=0.5) + tm_shape(data) +
+    tm_dots(fill=color, size=0.2, fill_alpha=0.7) +
+    tm_title("Catalina Island", size=0.7, fontface="bold") +
+    tm_layout(frame=TRUE, frame.lwd=2, bg.color="white")
+  list(main=main, inset=inset)
+}
 
-inset_entire <- tm_shape(census_tracts_sf, bbox = catalina_bbox) +
-  tm_fill(fill = "grey95") +
-  tm_borders(col = "grey70", lwd = 0.5) +
-  tm_shape(airbnb_entire) +
-  tm_dots(fill = "darkblue", size = 0.2, fill_alpha = 0.7) +
-  tm_title("Catalina Island", size = 0.7, fontface = "bold") +
-  tm_layout(frame = TRUE, frame.lwd = 2, bg.color = "white")
+p1 <- make_panel(airbnb_entire, "darkblue", "Entire Home/Apartment")
+p2 <- make_panel(airbnb_other, "darkred", "Hotel / Private / Shared Room")
 
-# Panel 2: Hotel/Private/Shared Room
-main_other <- tm_shape(census_tracts_sf, bbox = mainland_bbox) +
-  tm_borders(col = "grey70", lwd = 0.3) +
-  tm_shape(airbnb_other) +
-  tm_dots(fill = "darkred", size = 0.05, fill_alpha = 0.5) +
-  tm_title("Hotel / Private / Shared Room", fontface = "bold", size = 1.2) +
-  tm_scalebar(position = c("left", "bottom"), width = 15) +
-  tm_compass(type = "arrow", position = c("right", "top"), size = 2.4) +
-  tm_layout(frame = TRUE)
-
-inset_other <- tm_shape(census_tracts_sf, bbox = catalina_bbox) +
-  tm_fill(fill = "grey95") +
-  tm_borders(col = "grey70", lwd = 0.5) +
-  tm_shape(airbnb_other) +
-  tm_dots(fill = "darkred", size = 0.2, fill_alpha = 0.7) +
-  tm_title("Catalina Island", size = 0.7, fontface = "bold") +
-  tm_layout(frame = TRUE, frame.lwd = 2, bg.color = "white")
-
-# Print combined figure
 grid.newpage()
 pushViewport(viewport(layout = grid.layout(1, 2)))
-pushViewport(viewport(layout.pos.col = 1))
-print(main_entire, vp = viewport(x = 0.5, y = 0.5, width = 0.95, height = 0.95))
-print(inset_entire, vp = viewport(x = 0.78, y = 0.17, width = 0.22, height = 0.28))
-popViewport()
-pushViewport(viewport(layout.pos.col = 2))
-print(main_other, vp = viewport(x = 0.5, y = 0.5, width = 0.95, height = 0.95))
-print(inset_other, vp = viewport(x = 0.78, y = 0.17, width = 0.22, height = 0.28))
-popViewport()
+for(i in 1:2) {
+  p <- if(i==1) p1 else p2
+  pushViewport(viewport(layout.pos.col = i))
+  print(p$main, vp = viewport(x=0.5, y=0.5, width=0.95, height=0.95))
+  print(p$inset, vp = viewport(x=0.78, y=0.17, width=0.22, height=0.28))
+  popViewport()
+}
 ```
 
 # Mean Airbnb Prices by Census Tract
+[Your existing description text here]
 
-Performed a spatial join between Airbnb point data and census tract polygons to aggregate listings by administrative boundaries while dealing with NA values. Additionally, identified top 3 highest and the bottom three lowest price areas for annotation. Using markers to highlight extreme values. The use of Yellow - orange - red colour scheme with continuous classification to highlight price change. THe legend is placed externally to avoid obscuring map data while maintaining readability.
+```{r figure-2, fig.cap="**Figure 2:** Mean Airbnb prices by census tract."}
+tract_prices <- airbnb_sf %>% st_join(census_tracts_sf) %>% st_drop_geometry() %>%
+  group_by(GEOID) %>% summarise(mean_price = mean(price, na.rm=TRUE), .groups='drop')
+tracts_with_prices <- census_tracts_sf %>% left_join(tract_prices, by="GEOID")
 
-```{r figure-2, }
-
-tract_prices <- airbnb_sf %>%
-  st_join(census_tracts_sf) %>%
-  st_drop_geometry() %>%
-  group_by(GEOID) %>%
-  summarise(mean_price = mean(price, na.rm = TRUE), .groups = 'drop')
-
-tracts_with_prices <- census_tracts_sf %>%
-  left_join(tract_prices, by = "GEOID")
-
-all_highlight <- tracts_with_prices %>%
-  filter(!is.na(mean_price)) %>%
-  mutate(price_rank = rank(-mean_price, ties.method = "first")) %>%
+all_highlight <- tracts_with_prices %>% filter(!is.na(mean_price)) %>%
+  mutate(price_rank = rank(-mean_price, ties.method="first")) %>%
   filter(price_rank <= 3 | price_rank >= (max(price_rank) - 2)) %>%
-  mutate(
-    type = ifelse(price_rank <= 3, "Highest", "Lowest"),
-    label = case_when(
-      price_rank == 1 ~ "1st Highest",
-      price_rank == 2 ~ "2nd Highest",
-      price_rank == 3 ~ "3rd Highest",
-      price_rank == max(price_rank) ~ "1st Lowest",
-      price_rank == max(price_rank) - 1 ~ "2nd Lowest",
-      price_rank == max(price_rank) - 2 ~ "3rd Lowest"
-    )
-  ) %>%
+  mutate(type = ifelse(price_rank <= 3, "Highest", "Lowest"),
+         label = case_when(price_rank == 1 ~ "1st Highest", price_rank == 2 ~ "2nd Highest",
+                          price_rank == 3 ~ "3rd Highest", price_rank == max(price_rank) ~ "1st Lowest",
+                          price_rank == max(price_rank)-1 ~ "2nd Lowest", TRUE ~ "3rd Lowest")) %>%
   st_centroid()
 
-highest_tracts <- all_highlight %>% 
-  filter(type == "Highest") %>%
-  mutate(label = factor(label, levels = c("1st Highest", "2nd Highest", "3rd Highest")))
+highest_tracts <- all_highlight %>% filter(type=="Highest") %>% mutate(label=factor(label, levels=c("1st Highest","2nd Highest","3rd Highest")))
+lowest_tracts <- all_highlight %>% filter(type=="Lowest") %>% mutate(label=factor(label, levels=c("1st Lowest","2nd Lowest","3rd Lowest")))
 
-lowest_tracts <- all_highlight %>% 
-  filter(type == "Lowest") %>%
-  mutate(label = factor(label, levels = c("1st Lowest", "2nd Lowest", "3rd Lowest")))
+main_choropleth <- tm_shape(tracts_with_prices, bbox=mainland_bbox) +
+  tm_fill(fill="mean_price", fill.scale=tm_scale_continuous(values="YlOrRd"), fill.legend=tm_legend(title="Mean Price ($)")) +
+  tm_borders(col="grey70", lwd=0.2) +
+  tm_shape(highest_tracts) + tm_symbols(shape="label", shape.scale=tm_scale_categorical(values=c(24,25,23)), shape.legend=tm_legend(title="Highest Price"), fill="#DAA520", size=0.8, col="black", lwd=1.2) +
+  tm_shape(lowest_tracts) + tm_symbols(shape="label", shape.scale=tm_scale_categorical(values=c(21,22,8)), shape.legend=tm_legend(title="Lowest Price"), fill="#ee1616", size=0.8, col="black", lwd=1.2) +
+  tm_title("Mean Airbnb Price by Census Tract", fontface="bold", size=1.2) +
+  tm_compass(type="arrow", position=c("right","top"), size=2.4) +
+  tm_scalebar(position=c("left","bottom"), width=15) + tm_layout(frame=TRUE, legend.outside=TRUE, legend.outside.position="right")
 
-tmap_mode("plot")
+inset_choropleth <- tm_shape(tracts_with_prices, bbox=catalina_bbox) +
+  tm_fill(fill="mean_price", fill.scale=tm_scale_continuous(values="YlOrRd"), fill.legend=NULL) +
+  tm_borders(col="grey70", lwd=0.3) + tm_title("Catalina Island", size=1.0, fontface="bold") +
+  tm_layout(frame=TRUE, frame.lwd=2, bg.color="white", legend.show=FALSE)
 
-# Main Map
-main_choropleth <- tm_shape(tracts_with_prices, bbox = mainland_bbox) +
-  tm_fill(
-    fill = "mean_price",
-    fill.scale = tm_scale_continuous(values = "YlOrRd"),
-    fill.legend = tm_legend(title = "Mean Price ($)")
-  ) +
-  tm_borders(col = "grey70", lwd = 0.2) +
-  tm_shape(highest_tracts) +
-  tm_symbols(
-    shape = "label",
-    shape.scale = tm_scale_categorical(values = c(24, 25, 23)),
-    shape.legend = tm_legend(title = "Highest Price"),
-    fill = "#DAA520", size = 0.8, col = "black", lwd = 1.2
-  ) +
-  tm_shape(lowest_tracts) +
-  tm_symbols(
-    shape = "label",
-    shape.scale = tm_scale_categorical(values = c(21, 22, 8)),
-    shape.legend = tm_legend(title = "Lowest Price"),
-    fill = "#ee1616", size = 0.8, col = "black", lwd = 1.2
-  ) +
-  tm_title("Mean Airbnb Price by Census Tract", fontface = "bold", size = 1.2) +
-  tm_compass(type = "arrow", position = c("right", "top"), size = 2.4) +
-  tm_scalebar(position = c("left", "bottom"), width = 15) +
-  tm_layout(frame = TRUE, legend.outside = TRUE, legend.outside.position = "right")
-
-# Inset Map
-inset_choropleth <- tm_shape(tracts_with_prices, bbox = catalina_bbox) +
-  tm_fill(
-    fill = "mean_price",
-    fill.scale = tm_scale_continuous(values = "YlOrRd"),
-    fill.legend = NULL
-  ) +
-  tm_borders(col = "grey70", lwd = 0.3) +
-  tm_title("Catalina Island", size = 1.0, fontface = "bold") +
-  tm_layout(frame = TRUE, frame.lwd = 2, bg.color = "white", legend.show = FALSE)
-
-# Print combined figure
 grid.newpage()
-print(main_choropleth, vp = viewport(x = 0.5, y = 0.5, width = 1, height = 1))
-print(inset_choropleth, vp = viewport(x = 0.87, y = 0.145, width = 0.25, height = 0.25))
+print(main_choropleth, vp=viewport(x=0.5, y=0.5, width=1, height=1))
+print(inset_choropleth, vp=viewport(x=0.87, y=0.145, width=0.25, height=0.25))
 ```
 
 ### Narrative
 Figure 1 shows higher concentration of entire homes and apartments in downtown Los Angeles compared to hotels, private rooms, and shared accommodations. High-value rentals mainly cluster in coastal areas like Santa Monica, Venice, and the affluent hills of Hollywood and Beverly Hills, which attract many tourists. Conversely, private and shared rooms are more evenly distributed, indicating that hosts are more likely to rent out spare rooms rather than entire properties. Typically, regions with high tourism demand show more rentals, while vacant zones suggest residential areas with short-term rental restrictions or limited urban development. In Figure 2, a clear premium exists for coastal regions, with many dark brown patches along the coastline (Malibu, Santa Monica) and in the northern hills. An east-west divide is visible, with the western side displaying many more dark areas than the more affordable eastern side. The highest prices are in the Santa Monica mountains and Malibu, likely reflecting luxury rentals, while the lowest are in densely populated urban areas. For the colour mapping, I used the natural breaks method to ensure minimal variance within classes and maximum variance between classes, which benefits unevenly distributed data. Removing outliers has made lower-cost differences more apparent, improving the map's clarity and visual impact. The yellow-to-red palette intuitively associates red with higher prices. Using gold to highlight the top three most expensive and another colour for the bottom three enhances clarity. The high density of entire homes could pressure the long-term housing market.
 
-
-# Question 3: Mapping and Data Visualisation: Socio-economic variables from the ACS data
-## Discription
-Get renter occupancy data via tidycensus package using ACS variable B25003 for 2023. Then calculated percentage of renter occupied units (renter_occupied/total_units)x100 for each census tract. Join median household income data from provided ACS data to census tract geomtries. Create a two panel comparative choropleth using contrasting colour schemes: YlOrRd for rental percentages(intensity based) and GnBU for income. Positioned legends horizontally beneath maps to maximize space while ensuring colour-blind accessability. with a Continous colour scale.
+# Question 3: Mapping and Data Visualisation
 
 ```{r figure-3-data}
-# Get renter data from tidycensus
-renter_data <- get_acs(
-  state = "CA",
-  county = "Los Angeles",
-  geography = "tract",
-  variables = c(total_units = "B25003_001", renter_occupied = "B25003_003"),
-  geometry = FALSE,
-  year = 2023,
-  output = "wide"
-) %>% 
-  mutate(pct_renter = (renter_occupiedE / total_unitsE) * 100) %>%
-  select(GEOID, pct_renter)
+renter_data <- get_acs(state="CA", county="Los Angeles", geography="tract",
+  variables=c(total_units="B25003_001", renter_occupied="B25003_003"),
+  geometry=FALSE, year=2023, output="wide") %>%
+  mutate(pct_renter = (renter_occupiedE / total_unitsE) * 100) %>% select(GEOID, pct_renter)
 
-# Join renter data to census tracts
-renter_sf <- census_tracts_sf %>%
-  left_join(renter_data, by = "GEOID")
-
-# Get median income from provided census data
-Median_income_sf <- census_tracts_sf %>%
-  left_join(
-    census_data %>% select(GEOID, Median_income = B19013_001E),
-    by = "GEOID"
-  )
+renter_sf <- census_tracts_sf %>% left_join(renter_data, by="GEOID")
+Median_income_sf <- census_tracts_sf %>% left_join(census_data %>% select(GEOID, Median_income=B19013_001E), by="GEOID")
 ```
 
-```{r figure-3, fig.cap="**Figure 3:** Socio-economic characteristics of Los Angeles County census tracts. Panel A (left) shows percentage of renter-occupied housing units, with darker red indicating higher rental rates. Panel B (right) displays median household income, where darker blue represents higher income levels. Both maps reveal distinct spatial patterns of socio-economic stratification.", fig.width=14, fig.height=9}
-
+```{r figure-3, fig.cap="**Figure 3:** Socio-economic characteristics of Los Angeles County census tracts.", fig.width=14, fig.height=9}
 tmap_mode("plot")
 
-# Panel A: Renters
-main_renter <- tm_shape(renter_sf, bbox = mainland_bbox) +
-  tm_polygons(
-    fill = "pct_renter",
-    fill.scale = tm_scale_continuous(values = "YlOrRd"),
-    fill.legend = tm_legend(title = "Percentage Renters (%)", orientation = "landscape"), 
-    col = "white", lwd = 0.1
-  ) +
-  tm_title("A: Renter Occupancy", fontface = "bold", size = 1.2) +
-  tm_compass(type = "arrow", position = c("right", "top"), size = 1.5) +
-  tm_scalebar(position = c("right", "bottom"), width = 10) +
-  tm_layout(frame = TRUE, 
-            legend.outside = TRUE, 
-            legend.outside.position = "bottom",
-            legend.outside.size = 0.2,
-            inner.margins = c(0.02, 0.02, 0.02, 0.02))
+make_socio_panel <- function(data, var, palette, legend_title, panel_title) {
+  main <- tm_shape(data, bbox=mainland_bbox) +
+    tm_polygons(fill=var, fill.scale=tm_scale_continuous(values=palette),
+                fill.legend=tm_legend(title=legend_title, orientation="landscape"), col="white", lwd=0.1) +
+    tm_title(panel_title, fontface="bold", size=1.2) +
+    tm_compass(type="arrow", position=c("right","top"), size=1.5) +
+    tm_scalebar(position=c("right","bottom"), width=10) +
+    tm_layout(frame=TRUE, legend.outside=TRUE, legend.outside.position="bottom", legend.outside.size=0.2, inner.margins=c(0.02,0.02,0.02,0.02))
+  inset <- tm_shape(data, bbox=catalina_bbox) +
+    tm_polygons(fill=var, fill.scale=tm_scale_continuous(values=palette), fill.legend=tm_legend(show=FALSE), col="white", lwd=0.3) +
+    tm_title("Catalina Is.", size=0.6, fontface="bold") + tm_layout(frame=TRUE, frame.lwd=1, bg.color="white")
+  list(main=main, inset=inset)
+}
 
-inset_renter <- tm_shape(renter_sf, bbox = catalina_bbox) +
-  tm_polygons(
-    fill = "pct_renter",
-    fill.scale = tm_scale_continuous(values = "YlOrRd"),
-    fill.legend = tm_legend(show = FALSE),
-    col = "white", lwd = 0.3
-  ) +
-  tm_title("Catalina Is.", size = 0.6, fontface = "bold") +
-  tm_layout(frame = TRUE, frame.lwd = 1, bg.color = "white")
+p_renter <- make_socio_panel(renter_sf, "pct_renter", "YlOrRd", "Percentage Renters (%)", "A: Renter Occupancy")
+p_income <- make_socio_panel(Median_income_sf, "Median_income", "GnBu", "Median Income ($)", "B: Median Household Income")
 
-# Panel B: Income
-main_income <- tm_shape(Median_income_sf, bbox = mainland_bbox) +
-  tm_polygons(
-    fill = "Median_income",
-    fill.scale = tm_scale_continuous(values = "GnBu"),
-    fill.legend = tm_legend(title = "Median Income ($)", orientation = "landscape"),
-    col = "white", lwd = 0.1
-  ) +
-  tm_title("B: Median Household Income", fontface = "bold", size = 1.2) +
-  tm_compass(type = "arrow", position = c("right", "top"), size = 1.5) +
-  tm_scalebar(position = c("right", "bottom"), width = 10) +
-  tm_layout(frame = TRUE, 
-            legend.outside = TRUE, 
-            legend.outside.position = "bottom",
-            legend.outside.size = 0.2,
-            inner.margins = c(0.02, 0.02, 0.02, 0.02))
-
-inset_income <- tm_shape(Median_income_sf, bbox = catalina_bbox) +
-  tm_polygons(
-    fill = "Median_income",
-    fill.scale = tm_scale_continuous(values = "GnBu"),
-    fill.legend = tm_legend(show = FALSE),
-    col = "white", lwd = 0.3
-  ) +
-  tm_title("Catalina Is.", size = 0.6, fontface = "bold") +
-  tm_layout(frame = TRUE, frame.lwd = 1, bg.color = "white")
-
-# Print combined figure
 grid.newpage()
-pushViewport(viewport(layout = grid.layout(1, 2)))
-pushViewport(viewport(layout.pos.col = 1))
-print(main_renter, vp = viewport(x = 0.5, y = 0.5, width = 0.98, height = 0.98))
-print(inset_renter, vp = viewport(x = 0.78, y = 0.25, width = 0.22, height = 0.28))
-popViewport()
-pushViewport(viewport(layout.pos.col = 2))
-print(main_income, vp = viewport(x = 0.5, y = 0.5, width = 0.98, height = 0.98))
-print(inset_income, vp = viewport(x = 0.78, y = 0.25, width = 0.22, height = 0.28))
-popViewport()
+pushViewport(viewport(layout=grid.layout(1,2)))
+for(i in 1:2) {
+  p <- if(i==1) p_renter else p_income
+  pushViewport(viewport(layout.pos.col=i))
+  print(p$main, vp=viewport(x=0.5, y=0.5, width=0.98, height=0.98))
+  print(p$inset, vp=viewport(x=0.78, y=0.25, width=0.22, height=0.28))
+  popViewport()
+}
 ```
 
 ## Narrative
 Following Wachsmuth and Weisler's (2018) rent gap framework, I chose the percentage of renter-occupied units and median household income as key socioeconomic indicators. Renter occupancy was calculated as the percentage of renter-occupied housing units relative to total occupied housing units for each census tract. This indicates areas vulnerable to rental conversion and relates to income patterns shaping Airbnb’s spatial distribution. Together, these indicators highlight the dynamics of gentrification and the role of tourism economies in driving market expansion. The gap between actual rent (capitalised) and the unrealised potential of short-term rentals is a crucial factor accelerating gentrification and displacing low-income residents. Using income helps to distinguish tourist-serving areas from residential zones. Renter occupancy data was collected from the ACS via tidycensus (variable B25003). These demonstrate the relationship between rental rates and income, with low-income areas having a higher percentage of rentals, making them more susceptible to gentrification. This can be observed on the map, showing high renter occupancy in central/downtown LA, while it is lower in the suburbs. There is a clear inverse relationship between areas such as high-income wealth corridors like Malibu, Santa Monica, San Fernando, and Hollywood, contrasted with lower-income neighbourhoods such as Huntington Park and Compton. This inverse relationship between wealth and renting leaves LA’s low-income residents vulnerable, with some areas experiencing housing loss while others primarily host tourists. My choice of colour highlights this: The YLOrRD (yellow-orange-red) scheme for renter occupancy and GNBu for income were selected for their association with intensity and monetary values respectively, with the legends being positioned horizontally to allow space for the map while remaining colour-blind accessible. A continuous colour scale was employed to preserve the full variance in the data, avoiding any information loss or skew that might obscure neighbourhood-level variance.
 
+# Question 4: Bivariate Analysis
 
+```{r figure-4, fig.cap="**Figure 4:** Bivariate choropleth map examining the relationship between Airbnb prices and renter occupancy.", fig.width=10, fig.height=10}
+adjusted_summary_sf <- st_join(renter_sf, airbnb_sf, join=st_intersects) %>%
+  mutate(Price = log(price), `% That Rent` = pct_renter) %>%
+  select(GEOID, Price, `% That Rent`, geom) %>% st_as_sf()
 
-# Question 4: Bivariate Analysis: Price and Rental Patterns
-We start by spatially joining renter occupancy and Airbnb price data at census level. Using an applied natural logarithum transformation to prices(log(price)) to normalise right skewed distribution and model non-linear relationships linearly. The use of the purple - gold bivariate colour schem where axes represent Ln(price) and percentage renter simultaniously. Purple indicate high rental/low prices(vulnerable residential area); gold shows low renter/high prices(tourist zones); dark gold reveals displacement hotspots(high renter AND high prices). Focused analysis on mainland LA using defined bounding box to emphasize critical urban core.
-```{r figure-4, fig.cap="**Figure 4:** Bivariate choropleth map examining the relationship between the natual logorithum of Airbnb prices and percentage of renter-occupied housing. The purple-gold color scheme simultaneously displays both variables, revealing areas where high rental rates coincide with elevated Airbnb prices.", fig.width=10, fig.height=10}
-
-# Join renter and price data
-summary_sf <- st_join(renter_sf, airbnb_sf, join = st_intersects)
-
-# Prepare bivariate data
-adjusted_summary_sf <- summary_sf %>%
-  mutate(
-    Price = log(price),
-    `% That Rent` = pct_renter
-  ) %>%
-  select(GEOID, Price, `% That Rent`, geom) %>%
-  st_as_sf()
-
-tmap_mode("plot")
-
-figure_4_bivariate <- tm_shape(adjusted_summary_sf, bbox = mainland_bbox) +
-  tm_polygons(
-    fill = tm_vars(c("Price", "% That Rent"), multivariate = TRUE, animate = FALSE),
-    fill.scale = tm_scale_bivariate(values = "purplegold"),
-    fill.chart = tm_chart_heatmap()
-  ) +
-  tm_title("Bivariate Map: Ln House Price and Percentage Renters", fontface = "bold", size = 1.2) +
-  tm_compass(type = "arrow", position = c("right", "top"), size = 1.5) +
-  tm_scalebar(position = c("left", "bottom"), width = 15) +
-  tm_layout(
-    frame = TRUE, 
-    legend.outside = TRUE, 
-    legend.outside.position = "bottom",
-    legend.outside.size = 0.2,
-    inner.margins = c(0.02, 0.02, 0.02, 0.02)
-  )
-
-figure_4_bivariate
-```
-
-## Narative
-Figure 4 displays the natural logarithm of house prices alongside the percentage of renters across Los Angeles County. Using the natural log enables us to model nonlinear relationships linearly, aiding in normalising skewed data. The map shows both variables simultaneously, revealing spatial patterns and helping us determine whether high Airbnb prices correspond with areas of high renter populations. This informs whether Airbnb exploitation occurs in rental markets or mainly serves wealthy tourist zones. The map illustrates mean Airbnb listing prices (log-transformed and aggregated at the census tract level) combined with renter data from the ACS, using a purple–gold colour scheme—purple for high renters/low prices, yellow/gold for low renters/high prices, dark gold for high renters/high prices, and light purple for low on both. Dark gold areas indicate displacement hotspots, where rents are driven by short-term tourism rentals rather than residents. This suggests landlords profit from short-term rentals, and the property market mainly targets asset holding rather than residential use—highlighting the rent gap phenomenon. Koreantown emerges as a key displacement hotspot, situated near Hollywood, downtown LA, Dodger Stadium, and the airport, with easy transit access. Areas in the pure gold zone (high prices, low rent), such as Brentwood, are likely second-home investments serving affluent tourists, with low displacement risk due to fewer rental residents. Conversely, areas with many renters and low prices could become future short-term rental hotspots. Horn and Merante (2017) found that a 1% increase in Airbnb rentals can raise asking rents by 0.4%, illustrating how Airbnb can amplify neighbourhood rent levels and reduce long-term housing supply. Addressing high rental populations and elevated Airbnb prices requires targeted regulation to prevent houses from being purchased solely as assets, thereby releasing some homes for residents, lowering prices, and improving affordability (Gurran and Phibbs, 2017). The analysis highlights distinct Airbnb geographies: gentrification zones where high prices intersect with rental-heavy neighbourhoods (Hollywood, West LA), pure tourism zones catering to wealthy visitors (coastal corridor), and areas vulnerable to displacement. This inverse spatial pattern echoes Figure 3, demonstrating how economic inequality influences Airbnb's distribution.
-
-
-
-# Question 5: Restaurant Density Analysis with OSM
-Loading open Street map data, creating a new bbox for LA country. 
-```{r figure-5-data, cache=TRUE}
-# Query OpenStreetMap for restaurants
-test_bbox <- c(-119.473572, 33.493307, -117.051086, 34.633208)
-
-q <- opq(bbox = test_bbox) %>%
-  add_osm_feature(key = "amenity", value = "restaurant") %>%
-  osmdata_sf()
-
-restaurants <- q$osm_points %>% 
-  select(name, geometry) %>% 
-  filter(!is.na(geometry)) %>%
-  st_coordinates()
-```
-
-In this section I used open street maps to filter for amenitiy="resturant" feature to extract point geometries and transform to UTM32611. I then used kernal density estimation using the function stat_density_2d_filled with 15 contour bits with a viridis colour scheme with an overlay of neighbourhood boundaries without overwhelming density surface. 
-
-
-```{r figure-5, fig.cap="**Figure 5:** Kernel density estimation of restaurant locations across Los Angeles County. Warmer colors (yellow to white) indicate areas of higher restaurant concentration, highlighting commercial and tourist districts. The visualization uses a two-dimensional density estimation with contour lines to delineate density gradients.", fig.width=10, fig.height=8}
-
-# Convert restaurants dataframe to match coordinate system
-restaurants_df <- data.frame(restaurants) %>%
-  st_as_sf(coords = c("X", "Y"), crs = 4326) %>%
-  st_transform(32611)
-
-restaurants_coords <- st_coordinates(restaurants_df)
-
-p <- ggplot() +
-  stat_density_2d_filled(
-    data = as.data.frame(restaurants_coords),
-    aes(x = X, y = Y),
-    contour_var = "density",
-    bins = 15,
-    alpha = 0.9,
-    adjust = 1 
-  ) +
-  geom_sf(
-    data = neighbourhoods_sf,
-    fill = NA,
-    colour = "white",
-    linewidth = 0.2
-  ) +
-  scale_fill_viridis_d(
-    option = "inferno",
-    name = "Density",
-    guide = guide_legend(reverse = TRUE)
-  ) +
-  coord_sf() +
-  labs(
-    title = "Restaurant Density",
-    x = NULL,
-    y = NULL
-  ) +
-  theme_void(base_size = 12) +
-  theme(
-    legend.position = "right",
-    plot.title = element_text(face = "bold", hjust = 0.5, margin = margin(b = 10), color = "white"),
-    plot.background = element_rect(fill = "black", colour = NA),
-    legend.text = element_text(colour = "white"),
-    legend.title = element_text(colour = "white")
-  )
-
-print(p)
-```
-
-# Proximity Analysis: Airbnbs Near Restaurants
-Selecting Hollywood neighbourhood from neighbourhood.geojson for analysis based on highest tourist activity and amentiy density, the filered for resturants and airbnb listings to hollywood boundary using st_filter spatial predicate. Created 200 metre buffer around each resturant point representing comfortable walking distance. Identified overlapping buffers by using st_union to create continuous accessiblity zone, then performed a spatial intersection with st_intersect to identify listings within resturant buffers. 
-```{r figure-6, fig.cap="**Figure 6:** Proximity analysis showing Airbnb listings within 200-meter walking distance of restaurants in Hollywood. Dark blue points represent Airbnbs within the buffer zone (red shaded area), while grey points show listings outside this range. Red triangles mark restaurant locations. The analysis demonstrates the spatial relationship between accommodation and dining amenities.", fig.width=10, fig.height=8}
-
-# Define target neighbourhood
-chosen_neighbourhood <- "Hollywood"
-
-# Filter to neighbourhood
-target_sf <- neighbourhoods_sf %>%
-  filter(neighbourhood == chosen_neighbourhood)
-
-# Convert restaurants to sf
-restaurants_sf <- q$osm_points %>%
-  select(name, geometry) %>%
-  filter(!is.na(geometry)) %>%
-  st_as_sf() %>%
-  st_transform(32611)
-
-# Get restaurants in neighbourhood
-target_restaurants <- restaurants_sf %>%
-  st_filter(target_sf)
-
-# Create 200m buffers
-restaurant_buffers <- st_buffer(target_restaurants, dist = 200)
-buffer_union <- st_union(restaurant_buffers)
-
-# Get Airbnbs in neighbourhood
-target_airbnbs <- airbnb_sf %>%
-  st_filter(target_sf)
-
-# Find Airbnbs within 200m
-airbnbs_near <- target_airbnbs %>%
-  filter(lengths(st_intersects(., restaurant_buffers)) > 0)
-
-p <- ggplot() +
-  geom_sf(data = target_sf, fill = "#f8f9fa", color = "#495057", linewidth = 0.5) +
-  geom_sf(data = buffer_union, aes(fill = "Within 200m"), alpha = 0.2, color = NA) +
-  geom_sf(data = target_airbnbs, aes(color = "Outside 200m"), shape = 16, size = 1, alpha = 0.4) +
-  geom_sf(data = airbnbs_near, aes(color = "Airbnb (within 200m)"), shape = 16, size = 2) +
-  geom_sf(data = target_restaurants, aes(color = "Restaurant"), shape = 17, size = 2) +
-  annotation_scale(
-    location = "br",
-    width_hint = 0.15,
-    style = "ticks",
-    line_width = 0.5,
-    height = unit(0.15, "cm"),
-    pad_x = unit(0.5, "cm"),
-    pad_y = unit(0.5, "cm")
-  ) +
-  annotation_north_arrow(
-    location = "tr",
-    which_north = "true",
-    height = unit(1, "cm"),
-    width = unit(1, "cm"),
-    pad_x = unit(0.5, "cm"),
-    pad_y = unit(0.5, "cm"),
-    style = north_arrow_fancy_orienteering
-  ) +
-  scale_fill_manual(
-    name = NULL,
-    values = c("Within 200m" = "#e63946"),
-    guide = guide_legend(order = 1, override.aes = list(alpha = 0.2))
-  ) +
-  scale_color_manual(
-    name = NULL,
-    values = c("Outside 200m" = "grey70", 
-               "Airbnb (within 200m)" = "#1d3557", 
-               "Restaurant" = "#e63946"),
-    guide = guide_legend(order = 2, override.aes = list(
-      shape = c(16, 16, 17),
-      size = c(2, 3, 3),
-      alpha = 1
-    ))
-  ) +
-  labs(
-    title = paste("Airbnb Listings within 200m of Restaurants in", chosen_neighbourhood),
-    subtitle = paste0(nrow(airbnbs_near), " of ", nrow(target_airbnbs), 
-                      " listings within walking distance of ", nrow(target_restaurants), " restaurants"),
-    caption = "Data: Inside Airbnb & OpenStreetMap | CRS: EPSG 32611"
-  ) +
-  theme_void(base_size = 11) +
-  theme(
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
-    plot.subtitle = element_text(hjust = 0.5, color = "grey40", margin = margin(t = 5, b = 10)),
-    plot.caption = element_text(hjust = 0.5, color = "grey50", size = 8),
-    plot.margin = margin(15, 15, 15, 15),
-    legend.position = "bottom",
-    legend.box.margin = margin(t = 10)
-  )
-
-print(p)
-```
-
-# Narrative 
-Figure 5 maps restaurant density across Los Angeles County using OpenStreetMap data. The number of restaurants correlates with the area's popularity, often indicating higher rental and purchase prices. It represents tourism infrastructure and neighbourhood vibrancy, with density patterns revealing commercial centres, gentrification trends, and areas with higher disposable income. I applied kernel density estimation with a 3km bandwidth to identify hotspots. The main hotspots are located in downtown LA, with many other restaurants in areas such as West Hollywood and along the coast in Santa Monica, while peripheral residential zones show notable gaps. There is a strong correlation between Airbnb rentals and the number of restaurants. Highlighting the positive feedback loop of short-term rentals and the restaurant ecosystem, they share a mutually beneficial relationship. The high density of Airbnb listings results from the area's amenity-rich character. Figure 6 shows Airbnb listings within a 200m radius of restaurants in the neighbourhood of Hollywood. I chose Hollywood for its amenities, high Airbnb density, and tourist appeal. I created a 200m buffer around each restaurant, roughly representing a comfortable walking distance to these amenities.
-Of the 1320 listings, 758 (57%) were within a 200m radius of 367 restaurants, with restaurant clustering attracting tourists along streets such as Sunset and Hollywood Boulevard, while outer residential streets offer fewer options. This concentration highlights Airbnb hosts strategically located near dining amenities and within popular tourist areas, showing the correlation between amenity-dense neighbourhoods like Hollywood and West LA, demonstrating that dining infrastructure contributes to rental premiums. These properties offer accommodation at a premium, reinforcing a tourism-oriented geography. This ‘consumer city’ framework explains how clustering can induce and prioritise the provision of consumption amenities (Glaeser et al., 2001). Restaurant presence and access to dining amenities and retail are often indicators of, and drivers of, gentrification, attracting tourism and displacing residential services (Lloyd, 2002; Zukin et al., 2009). The effect of increased tourism and consumption of amenities can often distract from attractiveness for residents wishing to buy and live, as exemplified by Notting Hill gentrification, where making it a tourist attraction has reduced its desirability for residents (Parker, 2025).
-
-
-# Part B - Option 1: Point Pattern Analysis
-I started by converting census tract geometries to owin spatial objects windows for spatstat compatibility. Then extracted coordinates from airbnb sf object and create point pattern(ppp) with defined window boundary. Rescaled coordinates from metres to kilometers for appropriate bandwidth specification.
-```{r figure-7-8-combined, fig.cap="**Figure 7:** .Kernel density estimation using point pattern analysis with a Gaussian kernel (2km bandwidth)", fig.width=12, fig.height=10, fig.align ='center'}
-BA_boundary <- st_union(neighbourhoods_sf)
-BA_owin_m <- as.owin(BA_boundary)
-
-# Prepare point pattern
-coords <- st_coordinates(airbnb_sf)
-listings_ppp <- ppp(
-  x = coords[, 1],
-  y = coords[, 2],
-  window = BA_owin_m
-)
-
-# Rescale to km
-listings_ppp <- rescale(listings_ppp, 1000)
-BA_owin <- rescale(BA_owin_m, 1000)
-marks(listings_ppp) <- NULL
-
-# Calculate density
-K1 <- density.ppp(listings_ppp, sigma = 2)
-
-# Plot
-plot(K1, main = "Kernel Density of Airbnb Listings", las = 1)
-contour(K1, add = TRUE)
-plot(BA_owin, add = TRUE)
-```
-
-# Narritive
-Figure 7 uses kernel density estimation (KDE) to statistically identify Airbnb concentration hotspots. I used a 2 km bandwidth to balance local detail and regional patterns. This is crucial because it highlights areas at risk of displacement. Unlike dot or colour maps, KDE provides a continuous surface that enables examination of spatial relationships across borders or neighbourhoods.
-Downtown and Hollywood significantly surpass other Los Angeles areas, indicating that Airbnb rentals are mostly concentrated in tourist hotspots rather than being evenly spread, with a very high density in downtown. There are over 80 listings per km² in downtown Los Angeles and in secondary areas such as Santa Monica and Koreatown. Outside these zones, no prominent clusters are evident. Regions like San Fernando Valley and eastern suburbs show minimal activity. This likely stems from the walkability of downtown and Hollywood, which attracts higher tourist demand. This analysis also supports Wachsmuth and Weisler's (2018) rent gap theory, with high-intensity zones aligning directly with hotspots identified in Figure 4, where a high percentage of renters and a low percentage of buyers are observed. Where high renter populations coincide with elevated Airbnb prices, there is displacement pressure on existing renters as landlords shift from long-term to short-term rentals. This is driven by clusters of amenities and cultural attractions that attract tourists, combined with walkable neighbourhoods, creating a self-reinforcing cycle of commercialisation.
-New policies must be introduced to address this trend. I suggest that local authorities utilise kernel density analysis alongside renter occupancy rates to develop a vulnerability index that informs regulatory thresholds: areas with more than 50 listings per km² should be subject to permit freezes and a requirement to convert to long-term rentals. Zones with 20-50 listings should have growth caps to limit new permits, while those below 20 only need registration. This data-driven approach facilitates place-based decision-making, tackling the issue of declining housing stocks in communities while maintaining the tourism economy within suitable areas.
-
-
-# Figure 8: Transit Oriented Displacement
-I downloaded the LA Metro Red/Purple Line data from the Metro website, which included both the train tracks and station locations, then changed everything to use the same coordinate system (UTM Zone 11N) as the rest of my project. I created 400-metre circles around each station to show the area people can easily walk to from the station. I then counted how many Airbnb listings were inside each of these circles by joining the station buffers with the Airbnb data. I added these counts back to the station data so I could show them on the map using different sized circles, where bigger circles mean more Airbnb listings near that station. I found the vulnerable neighborhoods by looking for census tracts where more than 50% of people rent rather than own their homes, since these areas are more likely to lose housing when landlords switch to short-term rentals. I created a 1km-wide zone along the entire train line to show the area influenced by the transit system. I then filtered to only show the vulnerable tracts that fall within this transit zone, which shows where high numbers of renters live close to the metro stations. I selected several key neighborhoods like Hollywood, Koreatown, Downtown, West Hollywood, and others to show their boundaries on the map for context. I built the map in layers, starting with the vulnerable tracts shown in yellow-orange-red colors based on the percentage of renters, then adding neighborhood outlines in grey, station circles as dashed red lines, and the train route as a solid red line. I added the Airbnb listings as small gold dots, but only showed the ones near stations to keep the map clear. I showed each station as a dark red circle where the size shows how many Airbnbs are nearby, ranging from very small (0 listings) to large (500+ listings). I added a scale bar at the bottom and a north arrow at the top to help people read the map properly. I created a small overview map in the corner showing where the Red/Purple Line sits within all of LA County, using grey for the background and red to highlight the train line and vulnerable areas. The map shows that the biggest clusters of Airbnbs are at Hollywood (over 100 listings), Koreatown (90-100 listings), and downtown (80-100 listings), all in areas where most people rent their homes, while stations at the ends of the line have far fewer Airbnbs, suggesting that being in the city center matters more than just having a train station nearby.
-```{r}
-# Download Red/Purple Line data
-url_metro <- "https://developer.metro.net/wp-content/uploads/2019/10/802_Red_Purple_Track_0316.zip"
-url_station <- "https://developer.metro.net/wp-content/uploads/2019/10/802_805_RedPurple_Stations_0316.zip"
-
-if(!file.exists(file.path(ddir,"red-purple-line"))){
-  download.file(url = url_metro, destfile = file.path(ddir, "red-purple-line.zip"))
-  unzip(file.path(ddir, "red-purple-line.zip"), exdir = file.path(ddir, 'red-purple-line'))
-}
-
-if(!file.exists(file.path(ddir,"red-purple-stations"))){
-  download.file(url = url_station, destfile = file.path(ddir, "red-purple-stations.zip"))
-  unzip(file.path(ddir, "red-purple-stations.zip"), exdir = file.path(ddir, 'red-purple-stations'))
-}
-
-# Read and transform data
-red_purple_line_sf <- st_read(file.path(ddir, "red-purple-line/802_805_Track_0316.shp")) %>% 
-  st_transform(32611)
-
-station <- st_read(file.path(ddir, "red-purple-stations/RedPurpleLine0316.shp")) %>% 
-  select(STATION, geometry) %>% 
-  st_transform(32611)
-
-# Create 400m buffers around stations
-station_buffers <- st_buffer(station, dist = 400)
-
-# Spatial join to count Airbnb listings within buffers
-airbnb_near_redpurple <- st_join(airbnb_sf, station_buffers, left = FALSE) %>%
-  st_drop_geometry()
-
-# Count listings per station
-station_counts <- airbnb_near_redpurple %>%
-  group_by(STATION) %>%
-  summarise(n_airbnb = n()) %>%
-  ungroup()
-
-# Join counts back to station data
-station_with_counts <- station %>%
-  left_join(station_counts, by = "STATION") %>%
-  mutate(n_airbnb = replace_na(n_airbnb, 0))
-
-# Identify vulnerable census tracts (>50% renters) along the Red/Purple Line
-redpurple_corridor <- st_buffer(red_purple_line_sf, dist = 1000) %>% st_union()
-
-vulnerable_tracts_redpurple <- renter_sf %>%
-  filter(pct_renter > 50) %>%
-  st_filter(redpurple_corridor, .predicate = st_intersects)
-
-# Filter to key neighborhoods for context
-key_neighborhoods <- neighbourhoods_sf %>%
-  filter(neighbourhood %in% c("Hollywood", "Koreatown", "Downtown", 
-                               "West Hollywood", "Silver Lake", "Echo Park",
-                               "Venice", "Santa Monica", "Beverly Hills",
-                               "Westwood", "Mid-City"))
-
-# Create main Figure 8
-fig8_main <- ggplot() +
-  # Vulnerable census tracts in background
-  geom_sf(data = vulnerable_tracts_redpurple, 
-          aes(fill = pct_renter), 
-          color = "grey80", alpha = 0.5) +
-  scale_fill_distiller(palette = "YlOrRd", direction = 1,
-                       name = "% Renter\nOccupied",
-                       limits = c(50, 100)) +
-  
-  # Add neighborhood boundaries for context (NO LABELS)
-  geom_sf(data = key_neighborhoods,
-          fill = NA, color = "grey30", linewidth = 0.8, linetype = "solid") +
-  
-  # Station buffers
-  geom_sf(data = station_buffers, 
-          fill = NA, color = "#E31837", 
-          linetype = "dashed", linewidth = 0.5, alpha = 0.6) +
-  
-  # Red/Purple Line route
-  geom_sf(data = red_purple_line_sf, 
-          color = "#E31837", linewidth = 1.5) +
-  
-  # Airbnb points within buffers
-  geom_sf(data = airbnb_sf %>% st_filter(station_buffers),
-          color = "gold", size = 0.5, alpha = 0.4) +
-  
-  # Stations sized by Airbnb count
-  geom_sf(data = station_with_counts,
-          aes(size = n_airbnb), 
-          color = "darkred", alpha = 0.8, shape = 16) +
-  scale_size_continuous(name = "Airbnb\nListings\nwithin 400m",
-                        range = c(2, 8),
-                        breaks = c(0, 100, 200, 300, 400, 500)) +
-  
-  # Add scale bar and north arrow
-  annotation_scale(
-    location = "br",
-    width_hint = 0.15,
-    style = "ticks",
-    line_width = 0.5,
-    height = unit(0.15, "cm"),
-    pad_x = unit(0.5, "cm"),
-    pad_y = unit(0.5, "cm")
-  ) +
-  annotation_north_arrow(
-    location = "tr",
-    which_north = "true",
-    height = unit(1, "cm"),
-    width = unit(1, "cm"),
-    pad_x = unit(0.5, "cm"),
-    pad_y = unit(0.5, "cm"),
-    style = north_arrow_fancy_orienteering
-  ) +
-  
-  # Styling
-  theme_void() +
-  theme(
-    legend.position = "right",
-    legend.background = element_rect(fill = "white", color = "grey50"),
-    plot.title = element_text(face = "bold", hjust = 0.5, size = 13),
-    plot.subtitle = element_text(hjust = 0.5, color = "grey40", margin = margin(t = 5, b = 10)),
-    plot.caption = element_text(hjust = 0.5, color = "grey50", size = 8),
-    plot.margin = margin(15, 15, 15, 15)
-  ) +
-  labs(
-    title = "Airbnb Clustering Along the Red/Purple Line",
-    subtitle = "Transit-oriented displacement in Hollywood, Koreatown, and Downtown",
-    caption = "Data: Inside Airbnb, LA Metro, ACS 2019-2023 | CRS: EPSG 32611"
-  )
-
-# Create inset overview map
-inset_overview <- ggplot() +
-  geom_sf(data = census_tracts_sf, fill = "grey90", color = "grey80", linewidth = 0.1) +
-  geom_sf(data = red_purple_line_sf, color = "#E31837", linewidth = 2) +
-  geom_sf(data = vulnerable_tracts_redpurple, fill = "#E31837", alpha = 0.3, color = NA) +
-  theme_void() +
-  theme(
-    panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
-    plot.background = element_rect(fill = "white", color = NA)
-  )
-
-# Print with inset (similar to your Figure 1 and 2 approach)
-grid.newpage()
-print(fig8_main, vp = viewport(x = 0.5, y = 0.5, width = 1, height = 1))
-print(inset_overview, vp = viewport(x = 0.15, y = 0.22, width = 0.25, height = 0.25))
+tm_shape(adjusted_summary_sf, bbox=mainland_bbox) +
+  tm_polygons(fill=tm_vars(c("Price", "% That Rent"), multivariate=TRUE, animate=FALSE),
+              fill.scale=tm_scale_bivariate(values="purplegold"), fill.chart=tm_chart_heatmap()) +
+  tm_title("Bivariate Map: Ln House Price and Percentage Renters", fontface="bold", size=1.2) +
+  tm_compass(type="arrow", position=c("right","top"), size=1.5) +
+  tm_scalebar(position=c("left","bottom"), width=15) +
+  tm_layout(frame=TRUE, legend.outside=TRUE, legend.outside.position="bottom", legend.outside.size=0.2, inner.margins=c(0.02,0.02,0.02,0.02))
 ```
 
 ## Narrative
-Figure 8 examines transit-oriented displacement by mapping Airbnb clusters along the Red/Purple line through Hollywood, Koreatown, and downtown. I chose this line because of its proximity to many major tourist attractions and because it appears to have a large number of Airbnb rentals within Figure 4. Around each station, I have added a 400m buffer, the size of which varies depending on the number of Airbnb listings within this radius. In Figure 8, there is a pronounced clustering along the red/purple transit corridor, with concentrations notably uneven across each station. The largest clusters are around Hollywood, Koreatown, and downtown LA, where there are 80-100+ listings within the 400m buffer. The northern and southern termini show considerably lower density, suggesting that people are less willing to use public transport to commute to tourist attractions downtown. The high Airbnb density within census tracts with 80% renter occupancy suggests significant displacement pressure. These areas represent communities of renters experiencing intensive short-term rental activity. Hollywood exhibits expected tourist-oriented displacement. Transit can amplify tourist attractions with greater connectivity (Anderson, 2014), creating a more convenient location, such as easy access to the airport and downtown. There is also a high level of foot traffic at Hollywood, Highland, and Vine stations. Koreatown, one of LA’s densest areas with nearly 90 to 100 rental occupancy rate in many tracts, despite being residential, shows heavy Airbnb clustering. Transit makes it accessible for tourism despite limited tourist infrastructure. This highlights how long-term rental units have been converted for tourist accommodation. Downtown, a major transport hub, benefits from mixed-use development and good connectivity, making it attractive for Airbnb. Transit-oriented displacement stems from the areas becoming more touristy and more viable for short-term rentals. Transit enables the spatial expansion of tourism beyond traditional hotspots to places like the Santa Monica Coast, making neighbourhoods more accessible and commercially viable. Transit-oriented development with publicly funded accessibility improvements has led to an unintended consequence. LA Metro and city planners should establish a cap to limit the number of short-term rental properties around metro stations, and collect revenue from permits. This revenue can be used to fund affordable housing development within transit corridors. These areas are high risk, and a rebalancing is needed to align the tourism economy with the priorities of local residents. Spatially targeted approaches are more effective than citywide bans. With a well-designed policy, transit investments can generate a community dividend for public infrastructure rather than enabling displacement (Chapple and Loukaitou-Sideris, 2019).
+Figure 4 displays the natural logarithm of house prices alongside the percentage of renters across Los Angeles County. Using the natural log enables us to model nonlinear relationships linearly, aiding in normalising skewed data. The map shows both variables simultaneously, revealing spatial patterns and helping us determine whether high Airbnb prices correspond with areas of high renter populations. This informs whether Airbnb exploitation occurs in rental markets or mainly serves wealthy tourist zones. The map illustrates mean Airbnb listing prices (log-transformed and aggregated at the census tract level) combined with renter data from the ACS, using a purple–gold colour scheme—purple for high renters/low prices, yellow/gold for low renters/high prices, dark gold for high renters/high prices, and light purple for low on both. Dark gold areas indicate displacement hotspots, where rents are driven by short-term tourism rentals rather than residents. This suggests landlords profit from short-term rentals, and the property market mainly targets asset holding rather than residential use—highlighting the rent gap phenomenon. Koreantown emerges as a key displacement hotspot, situated near Hollywood, downtown LA, Dodger Stadium, and the airport, with easy transit access. Areas in the pure gold zone (high prices, low rent), such as Brentwood, are likely second-home investments serving affluent tourists, with low displacement risk due to fewer rental residents. Conversely, areas with many renters and low prices could become future short-term rental hotspots. Horn and Merante (2017) found that a 1% increase in Airbnb rentals can raise asking rents by 0.4%, illustrating how Airbnb can amplify neighbourhood rent levels and reduce long-term housing supply. Addressing high rental populations and elevated Airbnb prices requires targeted regulation to prevent houses from being purchased solely as assets, thereby releasing some homes for residents, lowering prices, and improving affordability (Gurran and Phibbs, 2017). The analysis highlights distinct Airbnb geographies: gentrification zones where high prices intersect with rental-heavy neighbourhoods (Hollywood, West LA), pure tourism zones catering to wealthy visitors (coastal corridor), and areas vulnerable to displacement. This inverse spatial pattern echoes Figure 3, demonstrating how economic inequality influences Airbnb's distribution.
+
+# Question 5: Restaurant Density Analysis with OSM
+[Your existing description text here]
+
+```{r figure-5-data, cache=TRUE}
+test_bbox <- c(-119.473572, 33.493307, -117.051086, 34.633208)
+q <- opq(bbox=test_bbox) %>% add_osm_feature(key="amenity", value="restaurant") %>% osmdata_sf()
+restaurants <- q$osm_points %>% select(name, geometry) %>% filter(!is.na(geometry)) %>% st_coordinates()
+```
+
+```{r figure-5, fig.cap="**Figure 5:** Kernel density estimation of restaurant locations.", fig.width=10, fig.height=8}
+restaurants_df <- data.frame(restaurants) %>% st_as_sf(coords=c("X","Y"), crs=4326) %>% st_transform(32611)
+restaurants_coords <- st_coordinates(restaurants_df)
+
+ggplot() +
+  stat_density_2d_filled(data=as.data.frame(restaurants_coords), aes(x=X, y=Y), contour_var="density", bins=15, alpha=0.9) +
+  geom_sf(data=neighbourhoods_sf, fill=NA, colour="white", linewidth=0.2) +
+  scale_fill_viridis_d(option="inferno", name="Density", guide=guide_legend(reverse=TRUE)) +
+  coord_sf() + labs(title="Restaurant Density", x=NULL, y=NULL) +
+  theme_void(base_size=12) +
+  theme(legend.position="right", plot.title=element_text(face="bold", hjust=0.5, color="white"),
+        plot.background=element_rect(fill="black", colour=NA), legend.text=element_text(colour="white"), legend.title=element_text(colour="white"))
+```
+
+# Proximity Analysis: Airbnbs Near Restaurants
+Figure 5 maps restaurant density across Los Angeles County using OpenStreetMap data. The number of restaurants correlates with the area's popularity, often indicating higher rental and purchase prices. It represents tourism infrastructure and neighbourhood vibrancy, with density patterns revealing commercial centres, gentrification trends, and areas with higher disposable income. I applied kernel density estimation with a 3km bandwidth to identify hotspots. The main hotspots are located in downtown LA, with many other restaurants in areas such as West Hollywood and along the coast in Santa Monica, while peripheral residential zones show notable gaps. There is a strong correlation between Airbnb rentals and the number of restaurants. Highlighting the positive feedback loop of short-term rentals and the restaurant ecosystem, they share a mutually beneficial relationship. The high density of Airbnb listings results from the area's amenity-rich character. 
+
+```{r figure-6, fig.cap="**Figure 6:** Proximity analysis showing Airbnb listings within 200m of restaurants in Hollywood.", fig.width=10, fig.height=8}
+chosen_neighbourhood <- "Hollywood"
+target_sf <- neighbourhoods_sf %>% filter(neighbourhood == chosen_neighbourhood)
+restaurants_sf <- q$osm_points %>% select(name, geometry) %>% filter(!is.na(geometry)) %>% st_as_sf() %>% st_transform(32611)
+target_restaurants <- restaurants_sf %>% st_filter(target_sf)
+restaurant_buffers <- st_buffer(target_restaurants, dist=200)
+buffer_union <- st_union(restaurant_buffers)
+target_airbnbs <- airbnb_sf %>% st_filter(target_sf)
+airbnbs_near <- target_airbnbs %>% filter(lengths(st_intersects(., restaurant_buffers)) > 0)
+
+ggplot() +
+  geom_sf(data=target_sf, fill="#f8f9fa", color="#495057", linewidth=0.5) +
+  geom_sf(data=buffer_union, aes(fill="Within 200m"), alpha=0.2, color=NA) +
+  geom_sf(data=target_airbnbs, aes(color="Outside 200m"), shape=16, size=1, alpha=0.4) +
+  geom_sf(data=airbnbs_near, aes(color="Airbnb (within 200m)"), shape=16, size=2) +
+  geom_sf(data=target_restaurants, aes(color="Restaurant"), shape=17, size=2) +
+  annotation_scale(location="br", width_hint=0.15, style="ticks", line_width=0.5, height=unit(0.15,"cm"), pad_x=unit(0.5,"cm"), pad_y=unit(0.5,"cm")) +
+  annotation_north_arrow(location="tr", which_north="true", height=unit(1,"cm"), width=unit(1,"cm"), pad_x=unit(0.5,"cm"), pad_y=unit(0.5,"cm"), style=north_arrow_fancy_orienteering) +
+  scale_fill_manual(name=NULL, values=c("Within 200m"="#e63946"), guide=guide_legend(order=1, override.aes=list(alpha=0.2))) +
+  scale_color_manual(name=NULL, values=c("Outside 200m"="grey70", "Airbnb (within 200m)"="#1d3557", "Restaurant"="#e63946"),
+                     guide=guide_legend(order=2, override.aes=list(shape=c(16,16,17), size=c(2,3,3), alpha=1))) +
+  labs(title=paste("Airbnb Listings within 200m of Restaurants in", chosen_neighbourhood),
+       subtitle=paste0(nrow(airbnbs_near), " of ", nrow(target_airbnbs), " listings within walking distance of ", nrow(target_restaurants), " restaurants"),
+       caption="Data: Inside Airbnb & OpenStreetMap | CRS: EPSG 32611") +
+  theme_void(base_size=11) +
+  theme(plot.title=element_text(face="bold", hjust=0.5, size=13), plot.subtitle=element_text(hjust=0.5, color="grey40", margin=margin(t=5,b=10)),
+        plot.caption=element_text(hjust=0.5, color="grey50", size=8), plot.margin=margin(15,15,15,15), legend.position="bottom", legend.box.margin=margin(t=10))
+```
+
+# Narrative
+Figure 6 shows Airbnb listings within a 200m radius of restaurants in the neighbourhood of Hollywood. I chose Hollywood for its amenities, high Airbnb density, and tourist appeal. I created a 200m buffer around each restaurant, roughly representing a comfortable walking distance to these amenities. Of the 1320 listings, 758 (57%) were within a 200m radius of 367 restaurants, with restaurant clustering attracting tourists along streets such as Sunset and Hollywood Boulevard, while outer residential streets offer fewer options. This concentration highlights Airbnb hosts strategically located near dining amenities and within popular tourist areas, showing the correlation between amenity-dense neighbourhoods like Hollywood and West LA, demonstrating that dining infrastructure contributes to rental premiums. These properties offer accommodation at a premium, reinforcing a tourism-oriented geography. This ‘consumer city’ framework explains how clustering can induce and prioritise the provision of consumption amenities (Glaeser et al., 2001). Restaurant presence and access to dining amenities and retail are often indicators of, and drivers of, gentrification, attracting tourism and displacing residential services (Lloyd, 2002; Zukin et al., 2009). The effect of increased tourism and consumption of amenities can often distract from attractiveness for residents wishing to buy and live, as exemplified by Notting Hill gentrification, where making it a tourist attraction has reduced its desirability for residents (Parker, 2025).
+
+# Part B - Option 1: Point Pattern Analysis
+[Your existing description text here]
+
+```{r figure-7-8-combined, fig.cap="**Figure 7:** Kernel density estimation using point pattern analysis (2km bandwidth).", fig.width=12, fig.height=10, fig.align='center'}
+BA_boundary <- st_union(neighbourhoods_sf)
+BA_owin_m <- as.owin(BA_boundary)
+coords <- st_coordinates(airbnb_sf)
+listings_ppp <- ppp(x=coords[,1], y=coords[,2], window=BA_owin_m)
+listings_ppp <- rescale(listings_ppp, 1000)
+BA_owin <- rescale(BA_owin_m, 1000)
+marks(listings_ppp) <- NULL
+K1 <- density.ppp(listings_ppp, sigma=2)
+
+plot(K1, main="Kernel Density of Airbnb Listings", las=1)
+contour(K1, add=TRUE)
+plot(BA_owin, add=TRUE)
+```
+
+# Narrative
+[Your existing narrative text here]
+
+# Figure 8: Transit Oriented Displacement
+[Your existing description text here]
+
+```{r figure-8, fig.cap="**Figure 8:** Airbnb clustering along the Red/Purple Line.", fig.width=12, fig.height=10}
+# Download Metro data
+url_metro <- "https://developer.metro.net/wp-content/uploads/2019/10/802_Red_Purple_Track_0316.zip"
+url_station <- "https://developer.metro.net/wp-content/uploads/2019/10/802_805_RedPurple_Stations_0316.zip"
+
+for(u in list(list(url_metro, "red-purple-line"), list(url_station, "red-purple-stations"))) {
+  if(!file.exists(file.path(ddir, u[[2]]))) {
+    download.file(url=u[[1]], destfile=file.path(ddir, paste0(u[[2]], ".zip")))
+    unzip(file.path(ddir, paste0(u[[2]], ".zip")), exdir=file.path(ddir, u[[2]]))
+  }
+}
+
+red_purple_line_sf <- st_read(file.path(ddir, "red-purple-line/802_805_Track_0316.shp")) %>% st_transform(32611)
+station <- st_read(file.path(ddir, "red-purple-stations/RedPurpleLine0316.shp")) %>% select(STATION, geometry) %>% st_transform(32611)
+station_buffers <- st_buffer(station, dist=400)
+
+station_counts <- st_join(airbnb_sf, station_buffers, left=FALSE) %>% st_drop_geometry() %>%
+  group_by(STATION) %>% summarise(n_airbnb=n()) %>% ungroup()
+station_with_counts <- station %>% left_join(station_counts, by="STATION") %>% mutate(n_airbnb=replace_na(n_airbnb, 0))
+
+redpurple_corridor <- st_buffer(red_purple_line_sf, dist=1000) %>% st_union()
+vulnerable_tracts_redpurple <- renter_sf %>% filter(pct_renter > 50) %>% st_filter(redpurple_corridor, .predicate=st_intersects)
+key_neighborhoods <- neighbourhoods_sf %>% filter(neighbourhood %in% c("Hollywood","Koreatown","Downtown","West Hollywood","Silver Lake","Echo Park","Venice","Santa Monica","Beverly Hills","Westwood","Mid-City"))
+
+fig8_main <- ggplot() +
+  geom_sf(data=vulnerable_tracts_redpurple, aes(fill=pct_renter), color="grey80", alpha=0.5) +
+  scale_fill_distiller(palette="YlOrRd", direction=1, name="% Renter\nOccupied", limits=c(50,100)) +
+  geom_sf(data=key_neighborhoods, fill=NA, color="grey30", linewidth=0.8) +
+  geom_sf(data=station_buffers, fill=NA, color="#E31837", linetype="dashed", linewidth=0.5, alpha=0.6) +
+  geom_sf(data=red_purple_line_sf, color="#E31837", linewidth=1.5) +
+  geom_sf(data=airbnb_sf %>% st_filter(station_buffers), color="gold", size=0.5, alpha=0.4) +
+  geom_sf(data=station_with_counts, aes(size=n_airbnb), color="darkred", alpha=0.8, shape=16) +
+  scale_size_continuous(name="Airbnb\nListings\nwithin 400m", range=c(2,8), breaks=c(0,100,200,300,400,500)) +
+  annotation_scale(location="br", width_hint=0.15, style="ticks", line_width=0.5, height=unit(0.15,"cm"), pad_x=unit(0.5,"cm"), pad_y=unit(0.5,"cm")) +
+  annotation_north_arrow(location="tr", which_north="true", height=unit(1,"cm"), width=unit(1,"cm"), pad_x=unit(0.5,"cm"), pad_y=unit(0.5,"cm"), style=north_arrow_fancy_orienteering) +
+  theme_void() +
+  theme(legend.position="right", legend.background=element_rect(fill="white", color="grey50"),
+        plot.title=element_text(face="bold", hjust=0.5, size=13), plot.subtitle=element_text(hjust=0.5, color="grey40", margin=margin(t=5,b=10)),
+        plot.caption=element_text(hjust=0.5, color="grey50", size=8), plot.margin=margin(15,15,15,15)) +
+  labs(title="Airbnb Clustering Along the Red/Purple Line", subtitle="Transit-oriented displacement in Hollywood, Koreatown, and Downtown",
+       caption="Data: Inside Airbnb, LA Metro, ACS 2019-2023 | CRS: EPSG 32611")
+
+inset_overview <- ggplot() +
+  geom_sf(data=census_tracts_sf, fill="grey90", color="grey80", linewidth=0.1) +
+  geom_sf(data=red_purple_line_sf, color="#E31837", linewidth=2) +
+  geom_sf(data=vulnerable_tracts_redpurple, fill="#E31837", alpha=0.3, color=NA) +
+  theme_void() + theme(panel.border=element_rect(color="black", fill=NA, linewidth=1), plot.background=element_rect(fill="white", color=NA))
+
+grid.newpage()
+print(fig8_main, vp=viewport(x=0.5, y=0.5, width=1, height=1))
+print(inset_overview, vp=viewport(x=0.15, y=0.22, width=0.25, height=0.25))
+```
+
+## Narrative
+[Your existing narrative text here]
 
 ## Conclusion
-This analysis reveals Airbnb concentration patterns aligned with tourism infrastructure, transit accessibility, and renter-heavy neighbourhoods. The rent gap framework explains how these patterns drive displacement in areas such as Hollywood and Koreatown. Place-based policy supported by spatial data, rather than blanket restrictions, offers a more effective approach to balancing housing affordability with the tourism economy.
-
+[Your existing conclusion text here]
