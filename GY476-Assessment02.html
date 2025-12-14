@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Assessment 2 GY476</title>
+<title>GY476 2025 SUMMATIVE ASSESSMENT</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,41 +19,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -81,7 +46,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Assessment 2 GY476</h1>
+<h1 class="title">GY476 2025 SUMMATIVE ASSESSMENT</h1>
 </div>
 
 
@@ -98,158 +63,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="setup-and-data-loading" class="level1">
-<h1>Setup and Data Loading</h1>
-<p>Setup and Data Loading In this section, I complete the basic setup for the assessment, such as setting my working directory and creating a data directory for organised and structured file management. I also configure the API key through a .Renviron file for secure access to the American community Survey data.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span>opts_chunk<span class="sc">$</span><span class="fu">set</span>(<span class="at">echo =</span> <span class="cn">TRUE</span>, <span class="at">warning =</span> <span class="cn">FALSE</span>, <span class="at">message =</span> <span class="cn">FALSE</span>, </span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">fig.align =</span> <span class="st">'center'</span>, <span class="at">fig.width =</span> <span class="dv">12</span>, <span class="at">fig.height =</span> <span class="dv">8</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>wdir <span class="ot">&lt;-</span> <span class="st">"/Users/dylanhillier/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/GY476_Geographic_Information_System/assessment02"</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-✔ dplyr     1.1.4     ✔ readr     2.1.5
-✔ forcats   1.0.1     ✔ stringr   1.5.2
-✔ ggplot2   4.0.0     ✔ tibble    3.3.0
-✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-✔ purrr     1.2.0     
-── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::filter() masks stats::filter()
-✖ dplyr::lag()    masks stats::lag()
-ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tmap)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidycensus)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(grid)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(osmdata)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggspatial)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(spatstat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: spatstat.data
-Loading required package: spatstat.univar
-spatstat.univar 3.1-4
-Loading required package: spatstat.geom
-spatstat.geom 3.6-0
-
-Attaching package: 'spatstat.geom'
-
-The following object is masked from 'package:grid':
-
-    as.mask
-
-Loading required package: spatstat.random
-spatstat.random 3.4-2
-Loading required package: spatstat.explore
-Loading required package: nlme
-
-Attaching package: 'nlme'
-
-The following object is masked from 'package:dplyr':
-
-    collapse
-
-spatstat.explore 3.5-3
-Loading required package: spatstat.model
-Loading required package: rpart
-spatstat.model 3.4-2
-Loading required package: spatstat.linnet
-spatstat.linnet 3.3-2
-
-spatstat 3.4-1 
-For an introduction to spatstat, type 'beginner' </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ddir <span class="ot">&lt;-</span> <span class="fu">file.path</span>(wdir, <span class="st">"data"</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">dir.exists</span>(ddir)) <span class="fu">dir.create</span>(ddir)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># To set up: Add CENSUS_API_KEY=your_key_here to your .Renviron file</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>api_key <span class="ot">&lt;-</span> <span class="fu">Sys.getenv</span>(<span class="st">"CENSUS_API_KEY"</span>)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(api_key <span class="sc">==</span> <span class="st">""</span>) {</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stop</span>(<span class="st">"Census API key not found. Please set CENSUS_API_KEY environment variable."</span>)</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="fu">census_api_key</span>(api_key, <span class="at">install =</span> <span class="cn">TRUE</span>, <span class="at">overwrite =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Your original .Renviron will be backed up and stored in your R HOME directory if needed.
-Your API key has been stored in your .Renviron and can be accessed by Sys.getenv("CENSUS_API_KEY"). 
-To use now, restart R or run `readRenviron("~/.Renviron")`</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "c990ed72472399dd626592b06afee9a188d03320"</code></pre>
-</div>
-</div>
-<p>Downloading Airbnb listing(listing.csv) and neighbourhood boundaries from Inside Airbnb for September 2025 snapshot, loaded pre-processed ACS 2019-2023 census data and census tract geometries from the provided geopackage. Additionally, we set bbox ranges, which define the area we are going to examine for the mainland and the islands of Catalina.</p>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>This report examines Los Angeles through two datasets: Airbnb listings and the American Community Survey (ACS). As a popular tourist destination, LA experiences high demand for short-term rentals, which reduces the supply of houses on the market, creating a ‘rental gap’ where short-term rentals are more profitable than long-term ones, thereby inducing gentrification and pricing out locals (Wachsmuth and Weisler, 2018). Data compiled from Airbnb’s website includes listing information alongside other variables such as price. The ACS captures poverty rates, socioeconomic disparities, and wealth inequality, offering insights into Los Angeles’s high levels of inequality (Bohn and Thorman, 2025). This spatial analysis examines the distribution of Airbnb listings and their relationship to key socioeconomic variables through a rent gap lens, informing policy decisions aimed at addressing the housing crisis in Los Angeles and alleviating homelessness (Nowell, 2025; The Economist, 2025).</p>
+</section>
+<section id="setup-and-data-loading" class="level2">
+<h2 class="anchored" data-anchor-id="setup-and-data-loading">Setup and Data Loading</h2>
+<p>Setup and Data Loading in this section, I complete the basic setup for the assessment, such as setting my working directory and creating a data directory, and loading all the relivent packages needed. Organised and structured file management so it can later be reproduced. Additionally, I have also secured my API key through a .Renviron file for secure access to the American Community Survey data.</p>
+<p>Downloading Airbnb listing(listing.csv) and neighbourhood boundaries from Inside Airbnb for September 2025 snapshot, loaded pre-processed ACS 2019-2023 census data and census tract geometries from the provided geopackage. Saving these file into the relivent data directory. Additionally, we set bbox ranges, which define the area we are going to examine for the mainland and the islands of Catalina. After extracting data from the relivent sources, I used st_transform to set the crs to 32611.</p>
 <p>Applied IQR-Based outlier removal for Airbnb prices: filtering outside the IQRx1.5 from Q1 and Q3 to improve visualisation. Reducing distortion from extreme luxury proporties. Additionally I am also standardising all CRS systems to 32611 which is critically measured in meters, important for this analysis.</p>
 </section>
-<section id="spatial-distribution-of-airbnb-listings" class="level1">
-<h1>Spatial Distribution of Airbnb Listings</h1>
+<section id="section-a" class="level1">
+<h1>Section A</h1>
+<section id="question-1" class="level2">
+<h2 class="anchored" data-anchor-id="question-1">Question 1</h2>
+<p>Airbnb data is publicly available and readily accessible via web scraping, providing a snapshot (specifically for September in Los Angeles) of Airbnb listings and prices in specific areas. The use of point-level geographic coordinates allows for spatial plotting alongside details like price, room type, availability, and reviews. It covers the entire LA metro area and Santa Catalina Island. However, there are limitations: it is not official Airbnb data but collated information. It also lacks key details such as actual booking prices (since it shows listed prices), fees or discounts, and private or unlisted properties. Additionally, it offers only a snapshot in time, neglecting seasonal variations common in Los Angeles. Lastly, since data is reported by hosts, there is a risk of unreliability or false information. Examining American Community Survey (ACS) data, it provides 5-year estimates (2019-2023) across various factors. While it has many strengths, such as being official government statistics offering detailed demographic, economic, and housing data, including a margin of error indicating uncertainty- it also has limitations.. However, 5-year averages can reduce reliability for current conditions. Since the data are aggregated at the tract level, we cannot observe smaller subdivisions, meaning tract averages do not reflect individual circumstances within each tract. Furthermore, as it is self-reported, it may include biases or inaccuracies from respondents. Listings with prices outside 1.5 × IQR from the quartiles were removed as outliers because they could misrepresent certain areas. Extremely high prices on rare luxury properties might not be typical of an area, potentially distorting visualisations and statistical summaries, and failing to accurately reflect the usual Airbnb markets. Finally, regarding the coordinate reference system (CRS), I have chosen UTM Zone 11N (EPSG:32611), since it uses metres, making measurements easier, covers all of Los Angeles with minimal distortion, and is well-suited for distance and area calculations. It is also commonly used in academic research. The reason WGS84 wasn’t used was partly because it is in degrees, which is less accurate for measuring distance.</p>
+</section>
+<section id="question-2-spatial-distribution-of-airbnb-listings" class="level2">
+<h2 class="anchored" data-anchor-id="question-2-spatial-distribution-of-airbnb-listings">Question 2: Spatial Distribution of Airbnb Listings</h2>
+<section id="discription" class="level3">
+<h3 class="anchored" data-anchor-id="discription">Discription</h3>
 <p>Split Airbnb listing into two categories: “Entire home/apt” versus combined “hotel room/private room/ Shared room” for a comparative analysis. Creating a dual-panel map with tmap visualisation, featuring mainland maps and Catalina Island map insets for comprehensive geographical coverage. Using a consistent dot size(0.05) and 50% transparency to allow for contrasting colours and distinguish room types. A scale bar (15km) and north arrow for spatial reference and professional cartographic standards. Revealing concentration patterns: entire homes clustered heavily in the coastal/central tourist one, while private/shared rooms showed more even distribution.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>airbnb_entire <span class="ot">&lt;-</span> airbnb_sf <span class="sc">%&gt;%</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(room_type <span class="sc">==</span> <span class="st">"Entire home/apt"</span>)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>airbnb_other <span class="ot">&lt;-</span> airbnb_sf <span class="sc">%&gt;%</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(room_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Hotel room"</span>, <span class="st">"Private room"</span>, <span class="st">"Shared room"</span>))</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Panel 1: Entire Home/Apartment</span></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>main_entire <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(census_tracts_sf, <span class="at">bbox =</span> mainland_bbox) <span class="sc">+</span></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">col =</span> <span class="st">"grey70"</span>, <span class="at">lwd =</span> <span class="fl">0.3</span>) <span class="sc">+</span></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(airbnb_entire) <span class="sc">+</span></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>(<span class="at">fill =</span> <span class="st">"darkblue"</span>, <span class="at">size =</span> <span class="fl">0.05</span>, <span class="at">fill_alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_title</span>(<span class="st">"Entire Home/Apartment"</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_scalebar</span>(<span class="at">position =</span> <span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>), <span class="at">width =</span> <span class="dv">15</span>) <span class="sc">+</span></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_compass</span>(<span class="at">type =</span> <span class="st">"arrow"</span>, <span class="at">position =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"top"</span>), <span class="at">size =</span> <span class="fl">2.4</span>) <span class="sc">+</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">frame =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>inset_entire <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(census_tracts_sf, <span class="at">bbox =</span> catalina_bbox) <span class="sc">+</span></span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="at">fill =</span> <span class="st">"grey95"</span>) <span class="sc">+</span></span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">col =</span> <span class="st">"grey70"</span>, <span class="at">lwd =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(airbnb_entire) <span class="sc">+</span></span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>(<span class="at">fill =</span> <span class="st">"darkblue"</span>, <span class="at">size =</span> <span class="fl">0.2</span>, <span class="at">fill_alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_title</span>(<span class="st">"Catalina Island"</span>, <span class="at">size =</span> <span class="fl">0.7</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>) <span class="sc">+</span></span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">frame =</span> <span class="cn">TRUE</span>, <span class="at">frame.lwd =</span> <span class="dv">2</span>, <span class="at">bg.color =</span> <span class="st">"white"</span>)</span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Panel 2: Hotel/Private/Shared Room</span></span>
-<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>main_other <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(census_tracts_sf, <span class="at">bbox =</span> mainland_bbox) <span class="sc">+</span></span>
-<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">col =</span> <span class="st">"grey70"</span>, <span class="at">lwd =</span> <span class="fl">0.3</span>) <span class="sc">+</span></span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(airbnb_other) <span class="sc">+</span></span>
-<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>(<span class="at">fill =</span> <span class="st">"darkred"</span>, <span class="at">size =</span> <span class="fl">0.05</span>, <span class="at">fill_alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_title</span>(<span class="st">"Hotel / Private / Shared Room"</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
-<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_scalebar</span>(<span class="at">position =</span> <span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>), <span class="at">width =</span> <span class="dv">15</span>) <span class="sc">+</span></span>
-<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_compass</span>(<span class="at">type =</span> <span class="st">"arrow"</span>, <span class="at">position =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"top"</span>), <span class="at">size =</span> <span class="fl">2.4</span>) <span class="sc">+</span></span>
-<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">frame =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>inset_other <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(census_tracts_sf, <span class="at">bbox =</span> catalina_bbox) <span class="sc">+</span></span>
-<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="at">fill =</span> <span class="st">"grey95"</span>) <span class="sc">+</span></span>
-<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">col =</span> <span class="st">"grey70"</span>, <span class="at">lwd =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(airbnb_other) <span class="sc">+</span></span>
-<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>(<span class="at">fill =</span> <span class="st">"darkred"</span>, <span class="at">size =</span> <span class="fl">0.2</span>, <span class="at">fill_alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_title</span>(<span class="st">"Catalina Island"</span>, <span class="at">size =</span> <span class="fl">0.7</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>) <span class="sc">+</span></span>
-<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">frame =</span> <span class="cn">TRUE</span>, <span class="at">frame.lwd =</span> <span class="dv">2</span>, <span class="at">bg.color =</span> <span class="st">"white"</span>)</span>
-<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Print combined figure</span></span>
-<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a><span class="fu">grid.newpage</span>()</span>
-<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a><span class="fu">pushViewport</span>(<span class="fu">viewport</span>(<span class="at">layout =</span> <span class="fu">grid.layout</span>(<span class="dv">1</span>, <span class="dv">2</span>)))</span>
-<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a><span class="fu">pushViewport</span>(<span class="fu">viewport</span>(<span class="at">layout.pos.col =</span> <span class="dv">1</span>))</span>
-<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(main_entire, <span class="at">vp =</span> <span class="fu">viewport</span>(<span class="at">x =</span> <span class="fl">0.5</span>, <span class="at">y =</span> <span class="fl">0.5</span>, <span class="at">width =</span> <span class="fl">0.95</span>, <span class="at">height =</span> <span class="fl">0.95</span>))</span>
-<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(inset_entire, <span class="at">vp =</span> <span class="fu">viewport</span>(<span class="at">x =</span> <span class="fl">0.78</span>, <span class="at">y =</span> <span class="fl">0.17</span>, <span class="at">width =</span> <span class="fl">0.22</span>, <span class="at">height =</span> <span class="fl">0.28</span>))</span>
-<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a><span class="fu">popViewport</span>()</span>
-<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a><span class="fu">pushViewport</span>(<span class="fu">viewport</span>(<span class="at">layout.pos.col =</span> <span class="dv">2</span>))</span>
-<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(main_other, <span class="at">vp =</span> <span class="fu">viewport</span>(<span class="at">x =</span> <span class="fl">0.5</span>, <span class="at">y =</span> <span class="fl">0.5</span>, <span class="at">width =</span> <span class="fl">0.95</span>, <span class="at">height =</span> <span class="fl">0.95</span>))</span>
-<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(inset_other, <span class="at">vp =</span> <span class="fu">viewport</span>(<span class="at">x =</span> <span class="fl">0.78</span>, <span class="at">y =</span> <span class="fl">0.17</span>, <span class="at">width =</span> <span class="fl">0.22</span>, <span class="at">height =</span> <span class="fl">0.28</span>))</span>
-<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a><span class="fu">popViewport</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -260,194 +95,31 @@ To use now, restart R or run `readRenviron("~/.Renviron")`</code></pre>
 </div>
 </div>
 </section>
+</section>
+</section>
 <section id="mean-airbnb-prices-by-census-tract" class="level1">
 <h1>Mean Airbnb Prices by Census Tract</h1>
 <p>Performed a spatial join between Airbnb point data and census tract polygons to aggregate listings by administrative boundaries while dealing with NA values. Additionally, identified top 3 highest and the bottom three lowest price areas for annotation. Using markers to highlight extreme values. The use of Yellow - orange - red colour scheme with continuous classification to highlight price change. THe legend is placed externally to avoid obscuring map data while maintaining readability.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>tract_prices <span class="ot">&lt;-</span> airbnb_sf <span class="sc">%&gt;%</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_join</span>(census_tracts_sf) <span class="sc">%&gt;%</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(GEOID) <span class="sc">%&gt;%</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mean_price =</span> <span class="fu">mean</span>(price, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">'drop'</span>)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>tracts_with_prices <span class="ot">&lt;-</span> census_tracts_sf <span class="sc">%&gt;%</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(tract_prices, <span class="at">by =</span> <span class="st">"GEOID"</span>)</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>all_highlight <span class="ot">&lt;-</span> tracts_with_prices <span class="sc">%&gt;%</span></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(mean_price)) <span class="sc">%&gt;%</span></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">price_rank =</span> <span class="fu">rank</span>(<span class="sc">-</span>mean_price, <span class="at">ties.method =</span> <span class="st">"first"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(price_rank <span class="sc">&lt;=</span> <span class="dv">3</span> <span class="sc">|</span> price_rank <span class="sc">&gt;=</span> (<span class="fu">max</span>(price_rank) <span class="sc">-</span> <span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="fu">ifelse</span>(price_rank <span class="sc">&lt;=</span> <span class="dv">3</span>, <span class="st">"Highest"</span>, <span class="st">"Lowest"</span>),</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="fu">case_when</span>(</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>      price_rank <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"1st Highest"</span>,</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>      price_rank <span class="sc">==</span> <span class="dv">2</span> <span class="sc">~</span> <span class="st">"2nd Highest"</span>,</span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>      price_rank <span class="sc">==</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"3rd Highest"</span>,</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>      price_rank <span class="sc">==</span> <span class="fu">max</span>(price_rank) <span class="sc">~</span> <span class="st">"1st Lowest"</span>,</span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>      price_rank <span class="sc">==</span> <span class="fu">max</span>(price_rank) <span class="sc">-</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"2nd Lowest"</span>,</span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>      price_rank <span class="sc">==</span> <span class="fu">max</span>(price_rank) <span class="sc">-</span> <span class="dv">2</span> <span class="sc">~</span> <span class="st">"3rd Lowest"</span></span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_centroid</span>()</span>
-<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>highest_tracts <span class="ot">&lt;-</span> all_highlight <span class="sc">%&gt;%</span> </span>
-<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(type <span class="sc">==</span> <span class="st">"Highest"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">label =</span> <span class="fu">factor</span>(label, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"1st Highest"</span>, <span class="st">"2nd Highest"</span>, <span class="st">"3rd Highest"</span>)))</span>
-<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>lowest_tracts <span class="ot">&lt;-</span> all_highlight <span class="sc">%&gt;%</span> </span>
-<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(type <span class="sc">==</span> <span class="st">"Lowest"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">label =</span> <span class="fu">factor</span>(label, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"1st Lowest"</span>, <span class="st">"2nd Lowest"</span>, <span class="st">"3rd Lowest"</span>)))</span>
-<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
-<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Main Map</span></span>
-<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>main_choropleth <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(tracts_with_prices, <span class="at">bbox =</span> mainland_bbox) <span class="sc">+</span></span>
-<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(</span>
-<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"mean_price"</span>,</span>
-<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill.scale =</span> <span class="fu">tm_scale_continuous</span>(<span class="at">values =</span> <span class="st">"YlOrRd"</span>),</span>
-<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill.legend =</span> <span class="fu">tm_legend</span>(<span class="at">title =</span> <span class="st">"Mean Price ($)"</span>)</span>
-<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">col =</span> <span class="st">"grey70"</span>, <span class="at">lwd =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
-<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(highest_tracts) <span class="sc">+</span></span>
-<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_symbols</span>(</span>
-<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">shape =</span> <span class="st">"label"</span>,</span>
-<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">shape.scale =</span> <span class="fu">tm_scale_categorical</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="dv">24</span>, <span class="dv">25</span>, <span class="dv">23</span>)),</span>
-<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">shape.legend =</span> <span class="fu">tm_legend</span>(<span class="at">title =</span> <span class="st">"Highest Price"</span>),</span>
-<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"#DAA520"</span>, <span class="at">size =</span> <span class="fl">0.8</span>, <span class="at">col =</span> <span class="st">"black"</span>, <span class="at">lwd =</span> <span class="fl">1.2</span></span>
-<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(lowest_tracts) <span class="sc">+</span></span>
-<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_symbols</span>(</span>
-<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>    <span class="at">shape =</span> <span class="st">"label"</span>,</span>
-<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>    <span class="at">shape.scale =</span> <span class="fu">tm_scale_categorical</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="dv">21</span>, <span class="dv">22</span>, <span class="dv">8</span>)),</span>
-<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>    <span class="at">shape.legend =</span> <span class="fu">tm_legend</span>(<span class="at">title =</span> <span class="st">"Lowest Price"</span>),</span>
-<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"#ee1616"</span>, <span class="at">size =</span> <span class="fl">0.8</span>, <span class="at">col =</span> <span class="st">"black"</span>, <span class="at">lwd =</span> <span class="fl">1.2</span></span>
-<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_title</span>(<span class="st">"Mean Airbnb Price by Census Tract"</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
-<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_compass</span>(<span class="at">type =</span> <span class="st">"arrow"</span>, <span class="at">position =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"top"</span>), <span class="at">size =</span> <span class="fl">2.4</span>) <span class="sc">+</span></span>
-<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_scalebar</span>(<span class="at">position =</span> <span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>), <span class="at">width =</span> <span class="dv">15</span>) <span class="sc">+</span></span>
-<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">frame =</span> <span class="cn">TRUE</span>, <span class="at">legend.outside =</span> <span class="cn">TRUE</span>, <span class="at">legend.outside.position =</span> <span class="st">"right"</span>)</span>
-<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a><span class="co"># Inset Map</span></span>
-<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>inset_choropleth <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(tracts_with_prices, <span class="at">bbox =</span> catalina_bbox) <span class="sc">+</span></span>
-<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(</span>
-<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"mean_price"</span>,</span>
-<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill.scale =</span> <span class="fu">tm_scale_continuous</span>(<span class="at">values =</span> <span class="st">"YlOrRd"</span>),</span>
-<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill.legend =</span> <span class="cn">NULL</span></span>
-<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">col =</span> <span class="st">"grey70"</span>, <span class="at">lwd =</span> <span class="fl">0.3</span>) <span class="sc">+</span></span>
-<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_title</span>(<span class="st">"Catalina Island"</span>, <span class="at">size =</span> <span class="fl">1.0</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>) <span class="sc">+</span></span>
-<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">frame =</span> <span class="cn">TRUE</span>, <span class="at">frame.lwd =</span> <span class="dv">2</span>, <span class="at">bg.color =</span> <span class="st">"white"</span>, <span class="at">legend.show =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-75"><a href="#cb13-75" aria-hidden="true" tabindex="-1"></a><span class="co"># Print combined figure</span></span>
-<span id="cb13-76"><a href="#cb13-76" aria-hidden="true" tabindex="-1"></a><span class="fu">grid.newpage</span>()</span>
-<span id="cb13-77"><a href="#cb13-77" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(main_choropleth, <span class="at">vp =</span> <span class="fu">viewport</span>(<span class="at">x =</span> <span class="fl">0.5</span>, <span class="at">y =</span> <span class="fl">0.5</span>, <span class="at">width =</span> <span class="dv">1</span>, <span class="at">height =</span> <span class="dv">1</span>))</span>
-<span id="cb13-78"><a href="#cb13-78" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(inset_choropleth, <span class="at">vp =</span> <span class="fu">viewport</span>(<span class="at">x =</span> <span class="fl">0.87</span>, <span class="at">y =</span> <span class="fl">0.145</span>, <span class="at">width =</span> <span class="fl">0.25</span>, <span class="at">height =</span> <span class="fl">0.25</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="GY476-Assessment02_files/figure-html/figure-2-1.png" class="img-fluid figure-img" width="1152"></p>
-<figcaption><strong>Figure 2:</strong> Choropleth map showing mean Airbnb prices aggregated by census tract. Golden triangles indicate the three highest-priced tracts (concentrated in coastal areas), while red circles mark the three lowest-priced tracts. Colour intensity reflects price gradient from yellow (lower) to red (higher).</figcaption>
+<p><img src="GY476-Assessment02_files/figure-html/figure-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1152"></p>
 </figure>
 </div>
 </div>
 </div>
+<section id="narrative" class="level3">
+<h3 class="anchored" data-anchor-id="narrative">Narrative</h3>
+<p>Figure 1 shows higher concentration of entire homes and apartments in downtown Los Angeles compared to hotels, private rooms, and shared accommodations. High-value rentals mainly cluster in coastal areas like Santa Monica, Venice, and the affluent hills of Hollywood and Beverly Hills, which attract many tourists. Conversely, private and shared rooms are more evenly distributed, indicating that hosts are more likely to rent out spare rooms rather than entire properties. Typically, regions with high tourism demand show more rentals, while vacant zones suggest residential areas with short-term rental restrictions or limited urban development. In Figure 2, a clear premium exists for coastal regions, with many dark brown patches along the coastline (Malibu, Santa Monica) and in the northern hills. An east-west divide is visible, with the western side displaying many more dark areas than the more affordable eastern side. The highest prices are in the Santa Monica mountains and Malibu, likely reflecting luxury rentals, while the lowest are in densely populated urban areas. For the colour mapping, I used the natural breaks method to ensure minimal variance within classes and maximum variance between classes, which benefits unevenly distributed data. Removing outliers has made lower-cost differences more apparent, improving the map’s clarity and visual impact. The yellow-to-red palette intuitively associates red with higher prices. Using gold to highlight the top three most expensive and another colour for the bottom three enhances clarity. The high density of entire homes could pressure the long-term housing market.</p>
 </section>
-<section id="socio-economic-characteristics" class="level1">
-<h1>Socio-Economic Characteristics</h1>
+</section>
+<section id="question-3-mapping-and-data-visualisation-socio-economic-variables-from-the-acs-data" class="level1">
+<h1>Question 3: Mapping and Data Visualisation: Socio-economic variables from the ACS data</h1>
+<section id="discription-1" class="level2">
+<h2 class="anchored" data-anchor-id="discription-1">Discription</h2>
 <p>Get renter occupancy data via tidycensus package using ACS variable B25003 for 2023. Then calculated percentage of renter occupied units (renter_occupied/total_units)x100 for each census tract. Join median household income data from provided ACS data to census tract geomtries. Create a two panel comparative choropleth using contrasting colour schemes: YlOrRd for rental percentages(intensity based) and GnBU for income. Positioned legends horizontally beneath maps to maximize space while ensuring colour-blind accessability. with a Continous colour scale.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get renter data from tidycensus</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>renter_data <span class="ot">&lt;-</span> <span class="fu">get_acs</span>(</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">state =</span> <span class="st">"CA"</span>,</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">county =</span> <span class="st">"Los Angeles"</span>,</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">geography =</span> <span class="st">"tract"</span>,</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">variables =</span> <span class="fu">c</span>(<span class="at">total_units =</span> <span class="st">"B25003_001"</span>, <span class="at">renter_occupied =</span> <span class="st">"B25003_003"</span>),</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">geometry =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">year =</span> <span class="dv">2023</span>,</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">output =</span> <span class="st">"wide"</span></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pct_renter =</span> (renter_occupiedE <span class="sc">/</span> total_unitsE) <span class="sc">*</span> <span class="dv">100</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(GEOID, pct_renter)</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Join renter data to census tracts</span></span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>renter_sf <span class="ot">&lt;-</span> census_tracts_sf <span class="sc">%&gt;%</span></span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(renter_data, <span class="at">by =</span> <span class="st">"GEOID"</span>)</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Get median income from provided census data</span></span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>Median_income_sf <span class="ot">&lt;-</span> census_tracts_sf <span class="sc">%&gt;%</span></span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    census_data <span class="sc">%&gt;%</span> <span class="fu">select</span>(GEOID, <span class="at">Median_income =</span> B19013_001E),</span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">"GEOID"</span></span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Panel A: Renters</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>main_renter <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(renter_sf, <span class="at">bbox =</span> mainland_bbox) <span class="sc">+</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"pct_renter"</span>,</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill.scale =</span> <span class="fu">tm_scale_continuous</span>(<span class="at">values =</span> <span class="st">"YlOrRd"</span>),</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill.legend =</span> <span class="fu">tm_legend</span>(<span class="at">title =</span> <span class="st">"Percentage Renters (%)"</span>, <span class="at">orientation =</span> <span class="st">"landscape"</span>), </span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="fl">0.1</span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_title</span>(<span class="st">"A: Renter Occupancy"</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_compass</span>(<span class="at">type =</span> <span class="st">"arrow"</span>, <span class="at">position =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"top"</span>), <span class="at">size =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_scalebar</span>(<span class="at">position =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"bottom"</span>), <span class="at">width =</span> <span class="dv">10</span>) <span class="sc">+</span></span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">frame =</span> <span class="cn">TRUE</span>, </span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.outside =</span> <span class="cn">TRUE</span>, </span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.outside.position =</span> <span class="st">"bottom"</span>,</span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.outside.size =</span> <span class="fl">0.2</span>,</span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">inner.margins =</span> <span class="fu">c</span>(<span class="fl">0.02</span>, <span class="fl">0.02</span>, <span class="fl">0.02</span>, <span class="fl">0.02</span>))</span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>inset_renter <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(renter_sf, <span class="at">bbox =</span> catalina_bbox) <span class="sc">+</span></span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(</span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"pct_renter"</span>,</span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill.scale =</span> <span class="fu">tm_scale_continuous</span>(<span class="at">values =</span> <span class="st">"YlOrRd"</span>),</span>
-<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill.legend =</span> <span class="fu">tm_legend</span>(<span class="at">show =</span> <span class="cn">FALSE</span>),</span>
-<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="fl">0.3</span></span>
-<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_title</span>(<span class="st">"Catalina Is."</span>, <span class="at">size =</span> <span class="fl">0.6</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>) <span class="sc">+</span></span>
-<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">frame =</span> <span class="cn">TRUE</span>, <span class="at">frame.lwd =</span> <span class="dv">1</span>, <span class="at">bg.color =</span> <span class="st">"white"</span>)</span>
-<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Panel B: Income</span></span>
-<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>main_income <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(Median_income_sf, <span class="at">bbox =</span> mainland_bbox) <span class="sc">+</span></span>
-<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(</span>
-<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Median_income"</span>,</span>
-<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill.scale =</span> <span class="fu">tm_scale_continuous</span>(<span class="at">values =</span> <span class="st">"GnBu"</span>),</span>
-<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill.legend =</span> <span class="fu">tm_legend</span>(<span class="at">title =</span> <span class="st">"Median Income ($)"</span>, <span class="at">orientation =</span> <span class="st">"landscape"</span>),</span>
-<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="fl">0.1</span></span>
-<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_title</span>(<span class="st">"B: Median Household Income"</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
-<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_compass</span>(<span class="at">type =</span> <span class="st">"arrow"</span>, <span class="at">position =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"top"</span>), <span class="at">size =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_scalebar</span>(<span class="at">position =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"bottom"</span>), <span class="at">width =</span> <span class="dv">10</span>) <span class="sc">+</span></span>
-<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">frame =</span> <span class="cn">TRUE</span>, </span>
-<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.outside =</span> <span class="cn">TRUE</span>, </span>
-<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.outside.position =</span> <span class="st">"bottom"</span>,</span>
-<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>            <span class="at">legend.outside.size =</span> <span class="fl">0.2</span>,</span>
-<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>            <span class="at">inner.margins =</span> <span class="fu">c</span>(<span class="fl">0.02</span>, <span class="fl">0.02</span>, <span class="fl">0.02</span>, <span class="fl">0.02</span>))</span>
-<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>inset_income <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(Median_income_sf, <span class="at">bbox =</span> catalina_bbox) <span class="sc">+</span></span>
-<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(</span>
-<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Median_income"</span>,</span>
-<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill.scale =</span> <span class="fu">tm_scale_continuous</span>(<span class="at">values =</span> <span class="st">"GnBu"</span>),</span>
-<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill.legend =</span> <span class="fu">tm_legend</span>(<span class="at">show =</span> <span class="cn">FALSE</span>),</span>
-<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="fl">0.3</span></span>
-<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb15-54"><a href="#cb15-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_title</span>(<span class="st">"Catalina Is."</span>, <span class="at">size =</span> <span class="fl">0.6</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>) <span class="sc">+</span></span>
-<span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">frame =</span> <span class="cn">TRUE</span>, <span class="at">frame.lwd =</span> <span class="dv">1</span>, <span class="at">bg.color =</span> <span class="st">"white"</span>)</span>
-<span id="cb15-56"><a href="#cb15-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-57"><a href="#cb15-57" aria-hidden="true" tabindex="-1"></a><span class="co"># Print combined figure</span></span>
-<span id="cb15-58"><a href="#cb15-58" aria-hidden="true" tabindex="-1"></a><span class="fu">grid.newpage</span>()</span>
-<span id="cb15-59"><a href="#cb15-59" aria-hidden="true" tabindex="-1"></a><span class="fu">pushViewport</span>(<span class="fu">viewport</span>(<span class="at">layout =</span> <span class="fu">grid.layout</span>(<span class="dv">1</span>, <span class="dv">2</span>)))</span>
-<span id="cb15-60"><a href="#cb15-60" aria-hidden="true" tabindex="-1"></a><span class="fu">pushViewport</span>(<span class="fu">viewport</span>(<span class="at">layout.pos.col =</span> <span class="dv">1</span>))</span>
-<span id="cb15-61"><a href="#cb15-61" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(main_renter, <span class="at">vp =</span> <span class="fu">viewport</span>(<span class="at">x =</span> <span class="fl">0.5</span>, <span class="at">y =</span> <span class="fl">0.5</span>, <span class="at">width =</span> <span class="fl">0.98</span>, <span class="at">height =</span> <span class="fl">0.98</span>))</span>
-<span id="cb15-62"><a href="#cb15-62" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(inset_renter, <span class="at">vp =</span> <span class="fu">viewport</span>(<span class="at">x =</span> <span class="fl">0.78</span>, <span class="at">y =</span> <span class="fl">0.25</span>, <span class="at">width =</span> <span class="fl">0.22</span>, <span class="at">height =</span> <span class="fl">0.28</span>))</span>
-<span id="cb15-63"><a href="#cb15-63" aria-hidden="true" tabindex="-1"></a><span class="fu">popViewport</span>()</span>
-<span id="cb15-64"><a href="#cb15-64" aria-hidden="true" tabindex="-1"></a><span class="fu">pushViewport</span>(<span class="fu">viewport</span>(<span class="at">layout.pos.col =</span> <span class="dv">2</span>))</span>
-<span id="cb15-65"><a href="#cb15-65" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(main_income, <span class="at">vp =</span> <span class="fu">viewport</span>(<span class="at">x =</span> <span class="fl">0.5</span>, <span class="at">y =</span> <span class="fl">0.5</span>, <span class="at">width =</span> <span class="fl">0.98</span>, <span class="at">height =</span> <span class="fl">0.98</span>))</span>
-<span id="cb15-66"><a href="#cb15-66" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(inset_income, <span class="at">vp =</span> <span class="fu">viewport</span>(<span class="at">x =</span> <span class="fl">0.78</span>, <span class="at">y =</span> <span class="fl">0.25</span>, <span class="at">width =</span> <span class="fl">0.22</span>, <span class="at">height =</span> <span class="fl">0.28</span>))</span>
-<span id="cb15-67"><a href="#cb15-67" aria-hidden="true" tabindex="-1"></a><span class="fu">popViewport</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -458,42 +130,15 @@ To use now, restart R or run `readRenviron("~/.Renviron")`</code></pre>
 </div>
 </div>
 </section>
-<section id="bivariate-analysis-price-and-rental-patterns" class="level1">
-<h1>Bivariate Analysis: Price and Rental Patterns</h1>
+<section id="narrative-1" class="level2">
+<h2 class="anchored" data-anchor-id="narrative-1">Narrative</h2>
+<p>Following Wachsmuth and Weisler’s (2018) rent gap framework, I chose the percentage of renter-occupied units and median household income as key socioeconomic indicators. Renter occupancy was calculated as the percentage of renter-occupied housing units relative to total occupied housing units for each census tract. This indicates areas vulnerable to rental conversion and relates to income patterns shaping Airbnb’s spatial distribution. Together, these indicators highlight the dynamics of gentrification and the role of tourism economies in driving market expansion. The gap between actual rent (capitalised) and the unrealised potential of short-term rentals is a crucial factor accelerating gentrification and displacing low-income residents. Using income helps to distinguish tourist-serving areas from residential zones. Renter occupancy data was collected from the ACS via tidycensus (variable B25003). These demonstrate the relationship between rental rates and income, with low-income areas having a higher percentage of rentals, making them more susceptible to gentrification. This can be observed on the map, showing high renter occupancy in central/downtown LA, while it is lower in the suburbs. There is a clear inverse relationship between areas such as high-income wealth corridors like Malibu, Santa Monica, San Fernando, and Hollywood, contrasted with lower-income neighbourhoods such as Huntington Park and Compton. This inverse relationship between wealth and renting leaves LA’s low-income residents vulnerable, with some areas experiencing housing loss while others primarily host tourists. My choice of colour highlights this: The YLOrRD (yellow-orange-red) scheme for renter occupancy and GNBu for income were selected for their association with intensity and monetary values respectively, with the legends being positioned horizontally to allow space for the map while remaining colour-blind accessible. A continuous colour scale was employed to preserve the full variance in the data, avoiding any information loss or skew that might obscure neighbourhood-level variance.</p>
+</section>
+</section>
+<section id="question-4-bivariate-analysis-price-and-rental-patterns" class="level1">
+<h1>Question 4: Bivariate Analysis: Price and Rental Patterns</h1>
 <p>We start by spatially joining renter occupancy and Airbnb price data at census level. Using an applied natural logarithum transformation to prices(log(price)) to normalise right skewed distribution and model non-linear relationships linearly. The use of the purple - gold bivariate colour schem where axes represent Ln(price) and percentage renter simultaniously. Purple indicate high rental/low prices(vulnerable residential area); gold shows low renter/high prices(tourist zones); dark gold reveals displacement hotspots(high renter AND high prices). Focused analysis on mainland LA using defined bounding box to emphasize critical urban core.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Join renter and price data</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>summary_sf <span class="ot">&lt;-</span> <span class="fu">st_join</span>(renter_sf, airbnb_sf, <span class="at">join =</span> st_intersects)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare bivariate data</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>adjusted_summary_sf <span class="ot">&lt;-</span> summary_sf <span class="sc">%&gt;%</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">Price =</span> <span class="fu">log</span>(price),</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">% That Rent</span><span class="st">`</span> <span class="ot">=</span> pct_renter</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(GEOID, Price, <span class="st">`</span><span class="at">% That Rent</span><span class="st">`</span>, geom) <span class="sc">%&gt;%</span></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>()</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>figure_4_bivariate <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(adjusted_summary_sf, <span class="at">bbox =</span> mainland_bbox) <span class="sc">+</span></span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(</span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="fu">tm_vars</span>(<span class="fu">c</span>(<span class="st">"Price"</span>, <span class="st">"% That Rent"</span>), <span class="at">multivariate =</span> <span class="cn">TRUE</span>, <span class="at">animate =</span> <span class="cn">FALSE</span>),</span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill.scale =</span> <span class="fu">tm_scale_bivariate</span>(<span class="at">values =</span> <span class="st">"purplegold"</span>),</span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill.chart =</span> <span class="fu">tm_chart_heatmap</span>()</span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_title</span>(<span class="st">"Bivariate Map: Ln House Price and Percentage Renters"</span>, <span class="at">fontface =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_compass</span>(<span class="at">type =</span> <span class="st">"arrow"</span>, <span class="at">position =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"top"</span>), <span class="at">size =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_scalebar</span>(<span class="at">position =</span> <span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>), <span class="at">width =</span> <span class="dv">15</span>) <span class="sc">+</span></span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(</span>
-<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">frame =</span> <span class="cn">TRUE</span>, </span>
-<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.outside =</span> <span class="cn">TRUE</span>, </span>
-<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.outside.position =</span> <span class="st">"bottom"</span>,</span>
-<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.outside.size =</span> <span class="fl">0.2</span>,</span>
-<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">inner.margins =</span> <span class="fu">c</span>(<span class="fl">0.02</span>, <span class="fl">0.02</span>, <span class="fl">0.02</span>, <span class="fl">0.02</span>)</span>
-<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>figure_4_bivariate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -503,68 +148,16 @@ To use now, restart R or run `readRenviron("~/.Renviron")`</code></pre>
 </div>
 </div>
 </div>
+<section id="narative" class="level2">
+<h2 class="anchored" data-anchor-id="narative">Narative</h2>
+<p>Figure 4 displays the natural logarithm of house prices alongside the percentage of renters across Los Angeles County. Using the natural log enables us to model nonlinear relationships linearly, aiding in normalising skewed data. The map shows both variables simultaneously, revealing spatial patterns and helping us determine whether high Airbnb prices correspond with areas of high renter populations. This informs whether Airbnb exploitation occurs in rental markets or mainly serves wealthy tourist zones. The map illustrates mean Airbnb listing prices (log-transformed and aggregated at the census tract level) combined with renter data from the ACS, using a purple–gold colour scheme—purple for high renters/low prices, yellow/gold for low renters/high prices, dark gold for high renters/high prices, and light purple for low on both. Dark gold areas indicate displacement hotspots, where rents are driven by short-term tourism rentals rather than residents. This suggests landlords profit from short-term rentals, and the property market mainly targets asset holding rather than residential use—highlighting the rent gap phenomenon. Koreantown emerges as a key displacement hotspot, situated near Hollywood, downtown LA, Dodger Stadium, and the airport, with easy transit access. Areas in the pure gold zone (high prices, low rent), such as Brentwood, are likely second-home investments serving affluent tourists, with low displacement risk due to fewer rental residents. Conversely, areas with many renters and low prices could become future short-term rental hotspots. Horn and Merante (2017) found that a 1% increase in Airbnb rentals can raise asking rents by 0.4%, illustrating how Airbnb can amplify neighbourhood rent levels and reduce long-term housing supply. Addressing high rental populations and elevated Airbnb prices requires targeted regulation to prevent houses from being purchased solely as assets, thereby releasing some homes for residents, lowering prices, and improving affordability (Gurran and Phibbs, 2017). The analysis highlights distinct Airbnb geographies: gentrification zones where high prices intersect with rental-heavy neighbourhoods (Hollywood, West LA), pure tourism zones catering to wealthy visitors (coastal corridor), and areas vulnerable to displacement. This inverse spatial pattern echoes Figure 3, demonstrating how economic inequality influences Airbnb’s distribution.</p>
 </section>
-<section id="restaurant-density-analysis" class="level1">
-<h1>Restaurant Density Analysis</h1>
+</section>
+<section id="question-5-restaurant-density-analysis-with-osm" class="level1">
+<h1>Question 5: Restaurant Density Analysis with OSM</h1>
 <p>Loading open Street map data, creating a new bbox for LA country.</p>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Query OpenStreetMap for restaurants</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>test_bbox <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">119.473572</span>, <span class="fl">33.493307</span>, <span class="sc">-</span><span class="fl">117.051086</span>, <span class="fl">34.633208</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fu">opq</span>(<span class="at">bbox =</span> test_bbox) <span class="sc">%&gt;%</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_osm_feature</span>(<span class="at">key =</span> <span class="st">"amenity"</span>, <span class="at">value =</span> <span class="st">"restaurant"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">osmdata_sf</span>()</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>restaurants <span class="ot">&lt;-</span> q<span class="sc">$</span>osm_points <span class="sc">%&gt;%</span> </span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(name, geometry) <span class="sc">%&gt;%</span> </span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(geometry)) <span class="sc">%&gt;%</span></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_coordinates</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 <p>In this section I used open street maps to filter for amenitiy=“resturant” feature to extract point geometries and transform to UTM32611. I then used kernal density estimation using the function stat_density_2d_filled with 15 contour bits with a viridis colour scheme with an overlay of neighbourhood boundaries without overwhelming density surface.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert restaurants dataframe to match coordinate system</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>restaurants_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(restaurants) <span class="sc">%&gt;%</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"X"</span>, <span class="st">"Y"</span>), <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="dv">32611</span>)</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>restaurants_coords <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(restaurants_df)</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_density_2d_filled</span>(</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> <span class="fu">as.data.frame</span>(restaurants_coords),</span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> X, <span class="at">y =</span> Y),</span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">contour_var =</span> <span class="st">"density"</span>,</span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">bins =</span> <span class="dv">15</span>,</span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.9</span>,</span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">adjust =</span> <span class="dv">1</span> </span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(</span>
-<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> neighbourhoods_sf,</span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="cn">NA</span>,</span>
-<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour =</span> <span class="st">"white"</span>,</span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">0.2</span></span>
-<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_d</span>(</span>
-<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"inferno"</span>,</span>
-<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Density"</span>,</span>
-<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">guide =</span> <span class="fu">guide_legend</span>(<span class="at">reverse =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_sf</span>() <span class="sc">+</span></span>
-<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Restaurant Density"</span>,</span>
-<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
-<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
-<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
-<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"right"</span>,</span>
-<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">b =</span> <span class="dv">10</span>), <span class="at">color =</span> <span class="st">"white"</span>),</span>
-<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"black"</span>, <span class="at">colour =</span> <span class="cn">NA</span>),</span>
-<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">colour =</span> <span class="st">"white"</span>),</span>
-<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">colour =</span> <span class="st">"white"</span>)</span>
-<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -579,93 +172,6 @@ To use now, restart R or run `readRenviron("~/.Renviron")`</code></pre>
 <h1>Proximity Analysis: Airbnbs Near Restaurants</h1>
 <p>Selecting Hollywood neighbourhood from neighbourhood.geojson for analysis based on highest tourist activity and amentiy density, the filered for resturants and airbnb listings to hollywood boundary using st_filter spatial predicate. Created 200 metre buffer around each resturant point representing comfortable walking distance. Identified overlapping buffers by using st_union to create continuous accessiblity zone, then performed a spatial intersection with st_intersect to identify listings within resturant buffers.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define target neighbourhood</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>chosen_neighbourhood <span class="ot">&lt;-</span> <span class="st">"Hollywood"</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter to neighbourhood</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>target_sf <span class="ot">&lt;-</span> neighbourhoods_sf <span class="sc">%&gt;%</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(neighbourhood <span class="sc">==</span> chosen_neighbourhood)</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert restaurants to sf</span></span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>restaurants_sf <span class="ot">&lt;-</span> q<span class="sc">$</span>osm_points <span class="sc">%&gt;%</span></span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(name, geometry) <span class="sc">%&gt;%</span></span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(geometry)) <span class="sc">%&gt;%</span></span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="dv">32611</span>)</span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Get restaurants in neighbourhood</span></span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>target_restaurants <span class="ot">&lt;-</span> restaurants_sf <span class="sc">%&gt;%</span></span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_filter</span>(target_sf)</span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Create 200m buffers</span></span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>restaurant_buffers <span class="ot">&lt;-</span> <span class="fu">st_buffer</span>(target_restaurants, <span class="at">dist =</span> <span class="dv">200</span>)</span>
-<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>buffer_union <span class="ot">&lt;-</span> <span class="fu">st_union</span>(restaurant_buffers)</span>
-<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Get Airbnbs in neighbourhood</span></span>
-<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>target_airbnbs <span class="ot">&lt;-</span> airbnb_sf <span class="sc">%&gt;%</span></span>
-<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_filter</span>(target_sf)</span>
-<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Find Airbnbs within 200m</span></span>
-<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>airbnbs_near <span class="ot">&lt;-</span> target_airbnbs <span class="sc">%&gt;%</span></span>
-<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">lengths</span>(<span class="fu">st_intersects</span>(., restaurant_buffers)) <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
-<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> target_sf, <span class="at">fill =</span> <span class="st">"#f8f9fa"</span>, <span class="at">color =</span> <span class="st">"#495057"</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> buffer_union, <span class="fu">aes</span>(<span class="at">fill =</span> <span class="st">"Within 200m"</span>), <span class="at">alpha =</span> <span class="fl">0.2</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
-<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> target_airbnbs, <span class="fu">aes</span>(<span class="at">color =</span> <span class="st">"Outside 200m"</span>), <span class="at">shape =</span> <span class="dv">16</span>, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
-<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> airbnbs_near, <span class="fu">aes</span>(<span class="at">color =</span> <span class="st">"Airbnb (within 200m)"</span>), <span class="at">shape =</span> <span class="dv">16</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> target_restaurants, <span class="fu">aes</span>(<span class="at">color =</span> <span class="st">"Restaurant"</span>), <span class="at">shape =</span> <span class="dv">17</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotation_scale</span>(</span>
-<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">location =</span> <span class="st">"br"</span>,</span>
-<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">width_hint =</span> <span class="fl">0.15</span>,</span>
-<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">style =</span> <span class="st">"ticks"</span>,</span>
-<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">line_width =</span> <span class="fl">0.5</span>,</span>
-<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">height =</span> <span class="fu">unit</span>(<span class="fl">0.15</span>, <span class="st">"cm"</span>),</span>
-<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">pad_x =</span> <span class="fu">unit</span>(<span class="fl">0.5</span>, <span class="st">"cm"</span>),</span>
-<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">pad_y =</span> <span class="fu">unit</span>(<span class="fl">0.5</span>, <span class="st">"cm"</span>)</span>
-<span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb19-46"><a href="#cb19-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotation_north_arrow</span>(</span>
-<span id="cb19-47"><a href="#cb19-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">location =</span> <span class="st">"tr"</span>,</span>
-<span id="cb19-48"><a href="#cb19-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">which_north =</span> <span class="st">"true"</span>,</span>
-<span id="cb19-49"><a href="#cb19-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">height =</span> <span class="fu">unit</span>(<span class="dv">1</span>, <span class="st">"cm"</span>),</span>
-<span id="cb19-50"><a href="#cb19-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">width =</span> <span class="fu">unit</span>(<span class="dv">1</span>, <span class="st">"cm"</span>),</span>
-<span id="cb19-51"><a href="#cb19-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">pad_x =</span> <span class="fu">unit</span>(<span class="fl">0.5</span>, <span class="st">"cm"</span>),</span>
-<span id="cb19-52"><a href="#cb19-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">pad_y =</span> <span class="fu">unit</span>(<span class="fl">0.5</span>, <span class="st">"cm"</span>),</span>
-<span id="cb19-53"><a href="#cb19-53" aria-hidden="true" tabindex="-1"></a>    <span class="at">style =</span> north_arrow_fancy_orienteering</span>
-<span id="cb19-54"><a href="#cb19-54" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb19-55"><a href="#cb19-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(</span>
-<span id="cb19-56"><a href="#cb19-56" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="cn">NULL</span>,</span>
-<span id="cb19-57"><a href="#cb19-57" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Within 200m"</span> <span class="ot">=</span> <span class="st">"#e63946"</span>),</span>
-<span id="cb19-58"><a href="#cb19-58" aria-hidden="true" tabindex="-1"></a>    <span class="at">guide =</span> <span class="fu">guide_legend</span>(<span class="at">order =</span> <span class="dv">1</span>, <span class="at">override.aes =</span> <span class="fu">list</span>(<span class="at">alpha =</span> <span class="fl">0.2</span>))</span>
-<span id="cb19-59"><a href="#cb19-59" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb19-60"><a href="#cb19-60" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(</span>
-<span id="cb19-61"><a href="#cb19-61" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="cn">NULL</span>,</span>
-<span id="cb19-62"><a href="#cb19-62" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Outside 200m"</span> <span class="ot">=</span> <span class="st">"grey70"</span>, </span>
-<span id="cb19-63"><a href="#cb19-63" aria-hidden="true" tabindex="-1"></a>               <span class="st">"Airbnb (within 200m)"</span> <span class="ot">=</span> <span class="st">"#1d3557"</span>, </span>
-<span id="cb19-64"><a href="#cb19-64" aria-hidden="true" tabindex="-1"></a>               <span class="st">"Restaurant"</span> <span class="ot">=</span> <span class="st">"#e63946"</span>),</span>
-<span id="cb19-65"><a href="#cb19-65" aria-hidden="true" tabindex="-1"></a>    <span class="at">guide =</span> <span class="fu">guide_legend</span>(<span class="at">order =</span> <span class="dv">2</span>, <span class="at">override.aes =</span> <span class="fu">list</span>(</span>
-<span id="cb19-66"><a href="#cb19-66" aria-hidden="true" tabindex="-1"></a>      <span class="at">shape =</span> <span class="fu">c</span>(<span class="dv">16</span>, <span class="dv">16</span>, <span class="dv">17</span>),</span>
-<span id="cb19-67"><a href="#cb19-67" aria-hidden="true" tabindex="-1"></a>      <span class="at">size =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">3</span>),</span>
-<span id="cb19-68"><a href="#cb19-68" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha =</span> <span class="dv">1</span></span>
-<span id="cb19-69"><a href="#cb19-69" aria-hidden="true" tabindex="-1"></a>    ))</span>
-<span id="cb19-70"><a href="#cb19-70" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb19-71"><a href="#cb19-71" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb19-72"><a href="#cb19-72" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="fu">paste</span>(<span class="st">"Airbnb Listings within 200m of Restaurants in"</span>, chosen_neighbourhood),</span>
-<span id="cb19-73"><a href="#cb19-73" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="fu">paste0</span>(<span class="fu">nrow</span>(airbnbs_near), <span class="st">" of "</span>, <span class="fu">nrow</span>(target_airbnbs), </span>
-<span id="cb19-74"><a href="#cb19-74" aria-hidden="true" tabindex="-1"></a>                      <span class="st">" listings within walking distance of "</span>, <span class="fu">nrow</span>(target_restaurants), <span class="st">" restaurants"</span>),</span>
-<span id="cb19-75"><a href="#cb19-75" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"Data: Inside Airbnb &amp; OpenStreetMap | CRS: EPSG 32611"</span></span>
-<span id="cb19-76"><a href="#cb19-76" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb19-77"><a href="#cb19-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>(<span class="at">base_size =</span> <span class="dv">11</span>) <span class="sc">+</span></span>
-<span id="cb19-78"><a href="#cb19-78" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb19-79"><a href="#cb19-79" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">13</span>),</span>
-<span id="cb19-80"><a href="#cb19-80" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">color =</span> <span class="st">"grey40"</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">t =</span> <span class="dv">5</span>, <span class="at">b =</span> <span class="dv">10</span>)),</span>
-<span id="cb19-81"><a href="#cb19-81" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.caption =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">color =</span> <span class="st">"grey50"</span>, <span class="at">size =</span> <span class="dv">8</span>),</span>
-<span id="cb19-82"><a href="#cb19-82" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="dv">15</span>, <span class="dv">15</span>, <span class="dv">15</span>, <span class="dv">15</span>),</span>
-<span id="cb19-83"><a href="#cb19-83" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"bottom"</span>,</span>
-<span id="cb19-84"><a href="#cb19-84" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.box.margin =</span> <span class="fu">margin</span>(<span class="at">t =</span> <span class="dv">10</span>)</span>
-<span id="cb19-85"><a href="#cb19-85" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb19-86"><a href="#cb19-86" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-87"><a href="#cb19-87" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -676,97 +182,32 @@ To use now, restart R or run `readRenviron("~/.Renviron")`</code></pre>
 </div>
 </div>
 </section>
-<section id="point-pattern-analysis" class="level1">
-<h1>Point Pattern Analysis</h1>
+<section id="narrative-2" class="level1">
+<h1>Narrative</h1>
+<p>Figure 5 maps restaurant density across Los Angeles County using OpenStreetMap data. The number of restaurants correlates with the area’s popularity, often indicating higher rental and purchase prices. It represents tourism infrastructure and neighbourhood vibrancy, with density patterns revealing commercial centres, gentrification trends, and areas with higher disposable income. I applied kernel density estimation with a 3km bandwidth to identify hotspots. The main hotspots are located in downtown LA, with many other restaurants in areas such as West Hollywood and along the coast in Santa Monica, while peripheral residential zones show notable gaps. There is a strong correlation between Airbnb rentals and the number of restaurants. Highlighting the positive feedback loop of short-term rentals and the restaurant ecosystem, they share a mutually beneficial relationship. The high density of Airbnb listings results from the area’s amenity-rich character. Figure 6 shows Airbnb listings within a 200m radius of restaurants in the neighbourhood of Hollywood. I chose Hollywood for its amenities, high Airbnb density, and tourist appeal. I created a 200m buffer around each restaurant, roughly representing a comfortable walking distance to these amenities. Of the 1320 listings, 758 (57%) were within a 200m radius of 367 restaurants, with restaurant clustering attracting tourists along streets such as Sunset and Hollywood Boulevard, while outer residential streets offer fewer options. This concentration highlights Airbnb hosts strategically located near dining amenities and within popular tourist areas, showing the correlation between amenity-dense neighbourhoods like Hollywood and West LA, demonstrating that dining infrastructure contributes to rental premiums. These properties offer accommodation at a premium, reinforcing a tourism-oriented geography. This ‘consumer city’ framework explains how clustering can induce and prioritise the provision of consumption amenities (Glaeser et al., 2001). Restaurant presence and access to dining amenities and retail are often indicators of, and drivers of, gentrification, attracting tourism and displacing residential services (Lloyd, 2002; Zukin et al., 2009). The effect of increased tourism and consumption of amenities can often distract from attractiveness for residents wishing to buy and live, as exemplified by Notting Hill gentrification, where making it a tourist attraction has reduced its desirability for residents (Parker, 2025).</p>
+</section>
+<section id="part-b---option-1-point-pattern-analysis" class="level1">
+<h1>Part B - Option 1: Point Pattern Analysis</h1>
 <p>I started by converting census tract geometries to owin spatial objects windows for spatstat compatibility. Then extracted coordinates from airbnb sf object and create point pattern(ppp) with defined window boundary. Rescaled coordinates from metres to kilometers for appropriate bandwidth specification.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set up two-panel plot</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Panel (a): Kernel Density Estimation</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Create boundary</span></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>BA_boundary <span class="ot">&lt;-</span> <span class="fu">st_union</span>(neighbourhoods_sf)</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>BA_owin_m <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(BA_boundary)</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare point pattern</span></span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>coords <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(airbnb_sf)</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>listings_ppp <span class="ot">&lt;-</span> <span class="fu">ppp</span>(</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> coords[, <span class="dv">1</span>],</span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> coords[, <span class="dv">2</span>],</span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">window =</span> BA_owin_m</span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Rescale to km</span></span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>listings_ppp <span class="ot">&lt;-</span> <span class="fu">rescale</span>(listings_ppp, <span class="dv">1000</span>)</span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>BA_owin <span class="ot">&lt;-</span> <span class="fu">rescale</span>(BA_owin_m, <span class="dv">1000</span>)</span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="fu">marks</span>(listings_ppp) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate density</span></span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>K1 <span class="ot">&lt;-</span> <span class="fu">density.ppp</span>(listings_ppp, <span class="at">sigma =</span> <span class="dv">2</span>)</span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(K1, <span class="at">main =</span> <span class="st">"(a) Kernel Density of Airbnb Listings"</span>, <span class="at">las =</span> <span class="dv">1</span>)</span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a><span class="fu">contour</span>(K1, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(BA_owin, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Panel (b): IDW Interpolation</span></span>
-<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare listings with price marks</span></span>
-<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>listings_transformed <span class="ot">&lt;-</span> airbnb_sf <span class="sc">%&gt;%</span></span>
-<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(price), price <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
-<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>coords_price <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(listings_transformed)</span>
-<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Create ppp with price marks</span></span>
-<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a>listings_ppp_price <span class="ot">&lt;-</span> <span class="fu">ppp</span>(</span>
-<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> coords_price[, <span class="dv">1</span>],</span>
-<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> coords_price[, <span class="dv">2</span>],</span>
-<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a>  <span class="at">marks =</span> listings_transformed<span class="sc">$</span>price,</span>
-<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a>  <span class="at">window =</span> BA_owin_m</span>
-<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Rescale to km</span></span>
-<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a>listings_ppp_price <span class="ot">&lt;-</span> <span class="fu">rescale</span>(listings_ppp_price, <span class="dv">1000</span>)</span>
-<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a><span class="co"># IDW interpolation</span></span>
-<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a>price_idw <span class="ot">&lt;-</span> <span class="fu">Smooth.ppp</span>(listings_ppp_price, <span class="at">sigma =</span> <span class="dv">2</span>)</span>
-<span id="cb20-50"><a href="#cb20-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-51"><a href="#cb20-51" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
-<span id="cb20-52"><a href="#cb20-52" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(price_idw, <span class="at">main =</span> <span class="st">"(b) IDW Interpolation of Prices"</span>, <span class="at">las =</span> <span class="dv">1</span>)</span>
-<span id="cb20-53"><a href="#cb20-53" aria-hidden="true" tabindex="-1"></a><span class="fu">contour</span>(price_idw, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb20-54"><a href="#cb20-54" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(BA_owin, <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="GY476-Assessment02_files/figure-html/figure-7-8-combined-1.png" class="img-fluid figure-img" width="1344"></p>
-<figcaption><strong>Figure 7:</strong> Spatial analysis of Airbnb listings in Los Angeles. (a) Kernel density estimation using point pattern analysis with a Gaussian kernel (2km bandwidth) showing clustering patterns with contour lines indicating concentration levels. (b) Inverse distance weighted (IDW) interpolation of listing prices creating a continuous surface where warmer colors indicate higher predicted prices, revealing spatial price trends and hotspots.</figcaption>
+<p><img src="GY476-Assessment02_files/figure-html/figure-7-8-combined-1.png" class="img-fluid figure-img" width="1152"></p>
+<figcaption><strong>Figure 7:</strong> .Kernel density estimation using point pattern analysis with a Gaussian kernel (2km bandwidth)</figcaption>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reset plotting parameters</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="narritive" class="level1">
+<h1>Narritive</h1>
+<p>Figure 7 uses kernel density estimation (KDE) to statistically identify Airbnb concentration hotspots. I used a 2 km bandwidth to balance local detail and regional patterns. This is crucial because it highlights areas at risk of displacement. Unlike dot or colour maps, KDE provides a continuous surface that enables examination of spatial relationships across borders or neighbourhoods. Downtown and Hollywood significantly surpass other Los Angeles areas, indicating that Airbnb rentals are mostly concentrated in tourist hotspots rather than being evenly spread, with a very high density in downtown. There are over 80 listings per km² in downtown Los Angeles and in secondary areas such as Santa Monica and Koreatown. Outside these zones, no prominent clusters are evident. Regions like San Fernando Valley and eastern suburbs show minimal activity. This likely stems from the walkability of downtown and Hollywood, which attracts higher tourist demand. This analysis also supports Wachsmuth and Weisler’s (2018) rent gap theory, with high-intensity zones aligning directly with hotspots identified in Figure 4, where a high percentage of renters and a low percentage of buyers are observed. Where high renter populations coincide with elevated Airbnb prices, there is displacement pressure on existing renters as landlords shift from long-term to short-term rentals. This is driven by clusters of amenities and cultural attractions that attract tourists, combined with walkable neighbourhoods, creating a self-reinforcing cycle of commercialisation. New policies must be introduced to address this trend. I suggest that local authorities utilise kernel density analysis alongside renter occupancy rates to develop a vulnerability index that informs regulatory thresholds: areas with more than 50 listings per km² should be subject to permit freezes and a requirement to convert to long-term rentals. Zones with 20-50 listings should have growth caps to limit new permits, while those below 20 only need registration. This data-driven approach facilitates place-based decision-making, tackling the issue of declining housing stocks in communities while maintaining the tourism economy within suitable areas.</p>
 </section>
 <section id="figure-8-transit-oriented-displacement" class="level1">
 <h1>Figure 8: Transit Oriented Displacement</h1>
 <p>I downloaded the LA Metro Red/Purple Line data from the Metro website, which included both the train tracks and station locations, then changed everything to use the same coordinate system (UTM Zone 11N) as the rest of my project. I created 400-metre circles around each station to show the area people can easily walk to from the station. I then counted how many Airbnb listings were inside each of these circles by joining the station buffers with the Airbnb data. I added these counts back to the station data so I could show them on the map using different sized circles, where bigger circles mean more Airbnb listings near that station. I found the vulnerable neighborhoods by looking for census tracts where more than 50% of people rent rather than own their homes, since these areas are more likely to lose housing when landlords switch to short-term rentals. I created a 1km-wide zone along the entire train line to show the area influenced by the transit system. I then filtered to only show the vulnerable tracts that fall within this transit zone, which shows where high numbers of renters live close to the metro stations. I selected several key neighborhoods like Hollywood, Koreatown, Downtown, West Hollywood, and others to show their boundaries on the map for context. I built the map in layers, starting with the vulnerable tracts shown in yellow-orange-red colors based on the percentage of renters, then adding neighborhood outlines in grey, station circles as dashed red lines, and the train route as a solid red line. I added the Airbnb listings as small gold dots, but only showed the ones near stations to keep the map clear. I showed each station as a dark red circle where the size shows how many Airbnbs are nearby, ranging from very small (0 listings) to large (500+ listings). I added a scale bar at the bottom and a north arrow at the top to help people read the map properly. I created a small overview map in the corner showing where the Red/Purple Line sits within all of LA County, using grey for the background and red to highlight the train line and vulnerable areas. The map shows that the biggest clusters of Airbnbs are at Hollywood (over 100 listings), Koreatown (90-100 listings), and downtown (80-100 listings), all in areas where most people rent their homes, while stations at the ends of the line have far fewer Airbnbs, suggesting that being in the city center matters more than just having a train station nearby.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Download Red/Purple Line data</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>url_metro <span class="ot">&lt;-</span> <span class="st">"https://developer.metro.net/wp-content/uploads/2019/10/802_Red_Purple_Track_0316.zip"</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>url_station <span class="ot">&lt;-</span> <span class="st">"https://developer.metro.net/wp-content/uploads/2019/10/802_805_RedPurple_Stations_0316.zip"</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="fu">file.path</span>(ddir,<span class="st">"red-purple-line"</span>))){</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">download.file</span>(<span class="at">url =</span> url_metro, <span class="at">destfile =</span> <span class="fu">file.path</span>(ddir, <span class="st">"red-purple-line.zip"</span>))</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unzip</span>(<span class="fu">file.path</span>(ddir, <span class="st">"red-purple-line.zip"</span>), <span class="at">exdir =</span> <span class="fu">file.path</span>(ddir, <span class="st">'red-purple-line'</span>))</span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">file.exists</span>(<span class="fu">file.path</span>(ddir,<span class="st">"red-purple-stations"</span>))){</span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">download.file</span>(<span class="at">url =</span> url_station, <span class="at">destfile =</span> <span class="fu">file.path</span>(ddir, <span class="st">"red-purple-stations.zip"</span>))</span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unzip</span>(<span class="fu">file.path</span>(ddir, <span class="st">"red-purple-stations.zip"</span>), <span class="at">exdir =</span> <span class="fu">file.path</span>(ddir, <span class="st">'red-purple-stations'</span>))</span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Read and transform data</span></span>
-<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>red_purple_line_sf <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="fu">file.path</span>(ddir, <span class="st">"red-purple-line/802_805_Track_0316.shp"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="dv">32611</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Reading layer `802_805_Track_0316' from data source 
   `/Users/dylanhillier/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/GY476_Geographic_Information_System/assessment02/data/red-purple-line/802_805_Track_0316.shp' 
@@ -777,9 +218,6 @@ Dimension:     XY
 Bounding box:  xmin: 6447247 ymin: 1836011 xmax: 6492388 ymax: 1884772
 Projected CRS: NAD83(HARN) / California zone 5 (ftUS)</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>station <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="fu">file.path</span>(ddir, <span class="st">"red-purple-stations/RedPurpleLine0316.shp"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(STATION, geometry) <span class="sc">%&gt;%</span> </span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="dv">32611</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Reading layer `RedPurpleLine0316' from data source 
   `/Users/dylanhillier/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/GY476_Geographic_Information_System/assessment02/data/red-purple-stations/RedPurpleLine0316.shp' 
@@ -790,124 +228,6 @@ Dimension:     XY
 Bounding box:  xmin: -118.3768 ymin: 34.04863 xmax: -118.2342 ymax: 34.1685
 Geodetic CRS:  WGS 84</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create 400m buffers around stations</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>station_buffers <span class="ot">&lt;-</span> <span class="fu">st_buffer</span>(station, <span class="at">dist =</span> <span class="dv">400</span>)</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Spatial join to count Airbnb listings within buffers</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>airbnb_near_redpurple <span class="ot">&lt;-</span> <span class="fu">st_join</span>(airbnb_sf, station_buffers, <span class="at">left =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>()</span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Count listings per station</span></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>station_counts <span class="ot">&lt;-</span> airbnb_near_redpurple <span class="sc">%&gt;%</span></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(STATION) <span class="sc">%&gt;%</span></span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n_airbnb =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Join counts back to station data</span></span>
-<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>station_with_counts <span class="ot">&lt;-</span> station <span class="sc">%&gt;%</span></span>
-<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(station_counts, <span class="at">by =</span> <span class="st">"STATION"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n_airbnb =</span> <span class="fu">replace_na</span>(n_airbnb, <span class="dv">0</span>))</span>
-<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Identify vulnerable census tracts (&gt;50% renters) along the Red/Purple Line</span></span>
-<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>redpurple_corridor <span class="ot">&lt;-</span> <span class="fu">st_buffer</span>(red_purple_line_sf, <span class="at">dist =</span> <span class="dv">1000</span>) <span class="sc">%&gt;%</span> <span class="fu">st_union</span>()</span>
-<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>vulnerable_tracts_redpurple <span class="ot">&lt;-</span> renter_sf <span class="sc">%&gt;%</span></span>
-<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(pct_renter <span class="sc">&gt;</span> <span class="dv">50</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_filter</span>(redpurple_corridor, <span class="at">.predicate =</span> st_intersects)</span>
-<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter to key neighborhoods for context</span></span>
-<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>key_neighborhoods <span class="ot">&lt;-</span> neighbourhoods_sf <span class="sc">%&gt;%</span></span>
-<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(neighbourhood <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Hollywood"</span>, <span class="st">"Koreatown"</span>, <span class="st">"Downtown"</span>, </span>
-<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"West Hollywood"</span>, <span class="st">"Silver Lake"</span>, <span class="st">"Echo Park"</span>,</span>
-<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"Venice"</span>, <span class="st">"Santa Monica"</span>, <span class="st">"Beverly Hills"</span>,</span>
-<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"Westwood"</span>, <span class="st">"Mid-City"</span>))</span>
-<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Create main Figure 8</span></span>
-<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>fig8_main <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Vulnerable census tracts in background</span></span>
-<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> vulnerable_tracts_redpurple, </span>
-<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>          <span class="fu">aes</span>(<span class="at">fill =</span> pct_renter), </span>
-<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a>          <span class="at">color =</span> <span class="st">"grey80"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_distiller</span>(<span class="at">palette =</span> <span class="st">"YlOrRd"</span>, <span class="at">direction =</span> <span class="dv">1</span>,</span>
-<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a>                       <span class="at">name =</span> <span class="st">"% Renter</span><span class="sc">\n</span><span class="st">Occupied"</span>,</span>
-<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a>                       <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">50</span>, <span class="dv">100</span>)) <span class="sc">+</span></span>
-<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add neighborhood boundaries for context (NO LABELS)</span></span>
-<span id="cb26-44"><a href="#cb26-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> key_neighborhoods,</span>
-<span id="cb26-45"><a href="#cb26-45" aria-hidden="true" tabindex="-1"></a>          <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="st">"grey30"</span>, <span class="at">linewidth =</span> <span class="fl">0.8</span>, <span class="at">linetype =</span> <span class="st">"solid"</span>) <span class="sc">+</span></span>
-<span id="cb26-46"><a href="#cb26-46" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb26-47"><a href="#cb26-47" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Station buffers</span></span>
-<span id="cb26-48"><a href="#cb26-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> station_buffers, </span>
-<span id="cb26-49"><a href="#cb26-49" aria-hidden="true" tabindex="-1"></a>          <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="st">"#E31837"</span>, </span>
-<span id="cb26-50"><a href="#cb26-50" aria-hidden="true" tabindex="-1"></a>          <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>, <span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
-<span id="cb26-51"><a href="#cb26-51" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb26-52"><a href="#cb26-52" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Red/Purple Line route</span></span>
-<span id="cb26-53"><a href="#cb26-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> red_purple_line_sf, </span>
-<span id="cb26-54"><a href="#cb26-54" aria-hidden="true" tabindex="-1"></a>          <span class="at">color =</span> <span class="st">"#E31837"</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb26-55"><a href="#cb26-55" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb26-56"><a href="#cb26-56" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Airbnb points within buffers</span></span>
-<span id="cb26-57"><a href="#cb26-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> airbnb_sf <span class="sc">%&gt;%</span> <span class="fu">st_filter</span>(station_buffers),</span>
-<span id="cb26-58"><a href="#cb26-58" aria-hidden="true" tabindex="-1"></a>          <span class="at">color =</span> <span class="st">"gold"</span>, <span class="at">size =</span> <span class="fl">0.5</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
-<span id="cb26-59"><a href="#cb26-59" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb26-60"><a href="#cb26-60" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Stations sized by Airbnb count</span></span>
-<span id="cb26-61"><a href="#cb26-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> station_with_counts,</span>
-<span id="cb26-62"><a href="#cb26-62" aria-hidden="true" tabindex="-1"></a>          <span class="fu">aes</span>(<span class="at">size =</span> n_airbnb), </span>
-<span id="cb26-63"><a href="#cb26-63" aria-hidden="true" tabindex="-1"></a>          <span class="at">color =</span> <span class="st">"darkred"</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>, <span class="at">shape =</span> <span class="dv">16</span>) <span class="sc">+</span></span>
-<span id="cb26-64"><a href="#cb26-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size_continuous</span>(<span class="at">name =</span> <span class="st">"Airbnb</span><span class="sc">\n</span><span class="st">Listings</span><span class="sc">\n</span><span class="st">within 400m"</span>,</span>
-<span id="cb26-65"><a href="#cb26-65" aria-hidden="true" tabindex="-1"></a>                        <span class="at">range =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">8</span>),</span>
-<span id="cb26-66"><a href="#cb26-66" aria-hidden="true" tabindex="-1"></a>                        <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>, <span class="dv">400</span>, <span class="dv">500</span>)) <span class="sc">+</span></span>
-<span id="cb26-67"><a href="#cb26-67" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb26-68"><a href="#cb26-68" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add scale bar and north arrow</span></span>
-<span id="cb26-69"><a href="#cb26-69" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotation_scale</span>(</span>
-<span id="cb26-70"><a href="#cb26-70" aria-hidden="true" tabindex="-1"></a>    <span class="at">location =</span> <span class="st">"br"</span>,</span>
-<span id="cb26-71"><a href="#cb26-71" aria-hidden="true" tabindex="-1"></a>    <span class="at">width_hint =</span> <span class="fl">0.15</span>,</span>
-<span id="cb26-72"><a href="#cb26-72" aria-hidden="true" tabindex="-1"></a>    <span class="at">style =</span> <span class="st">"ticks"</span>,</span>
-<span id="cb26-73"><a href="#cb26-73" aria-hidden="true" tabindex="-1"></a>    <span class="at">line_width =</span> <span class="fl">0.5</span>,</span>
-<span id="cb26-74"><a href="#cb26-74" aria-hidden="true" tabindex="-1"></a>    <span class="at">height =</span> <span class="fu">unit</span>(<span class="fl">0.15</span>, <span class="st">"cm"</span>),</span>
-<span id="cb26-75"><a href="#cb26-75" aria-hidden="true" tabindex="-1"></a>    <span class="at">pad_x =</span> <span class="fu">unit</span>(<span class="fl">0.5</span>, <span class="st">"cm"</span>),</span>
-<span id="cb26-76"><a href="#cb26-76" aria-hidden="true" tabindex="-1"></a>    <span class="at">pad_y =</span> <span class="fu">unit</span>(<span class="fl">0.5</span>, <span class="st">"cm"</span>)</span>
-<span id="cb26-77"><a href="#cb26-77" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb26-78"><a href="#cb26-78" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotation_north_arrow</span>(</span>
-<span id="cb26-79"><a href="#cb26-79" aria-hidden="true" tabindex="-1"></a>    <span class="at">location =</span> <span class="st">"tr"</span>,</span>
-<span id="cb26-80"><a href="#cb26-80" aria-hidden="true" tabindex="-1"></a>    <span class="at">which_north =</span> <span class="st">"true"</span>,</span>
-<span id="cb26-81"><a href="#cb26-81" aria-hidden="true" tabindex="-1"></a>    <span class="at">height =</span> <span class="fu">unit</span>(<span class="dv">1</span>, <span class="st">"cm"</span>),</span>
-<span id="cb26-82"><a href="#cb26-82" aria-hidden="true" tabindex="-1"></a>    <span class="at">width =</span> <span class="fu">unit</span>(<span class="dv">1</span>, <span class="st">"cm"</span>),</span>
-<span id="cb26-83"><a href="#cb26-83" aria-hidden="true" tabindex="-1"></a>    <span class="at">pad_x =</span> <span class="fu">unit</span>(<span class="fl">0.5</span>, <span class="st">"cm"</span>),</span>
-<span id="cb26-84"><a href="#cb26-84" aria-hidden="true" tabindex="-1"></a>    <span class="at">pad_y =</span> <span class="fu">unit</span>(<span class="fl">0.5</span>, <span class="st">"cm"</span>),</span>
-<span id="cb26-85"><a href="#cb26-85" aria-hidden="true" tabindex="-1"></a>    <span class="at">style =</span> north_arrow_fancy_orienteering</span>
-<span id="cb26-86"><a href="#cb26-86" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb26-87"><a href="#cb26-87" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb26-88"><a href="#cb26-88" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Styling</span></span>
-<span id="cb26-89"><a href="#cb26-89" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
-<span id="cb26-90"><a href="#cb26-90" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb26-91"><a href="#cb26-91" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"right"</span>,</span>
-<span id="cb26-92"><a href="#cb26-92" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"white"</span>, <span class="at">color =</span> <span class="st">"grey50"</span>),</span>
-<span id="cb26-93"><a href="#cb26-93" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">13</span>),</span>
-<span id="cb26-94"><a href="#cb26-94" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">color =</span> <span class="st">"grey40"</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">t =</span> <span class="dv">5</span>, <span class="at">b =</span> <span class="dv">10</span>)),</span>
-<span id="cb26-95"><a href="#cb26-95" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.caption =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">color =</span> <span class="st">"grey50"</span>, <span class="at">size =</span> <span class="dv">8</span>),</span>
-<span id="cb26-96"><a href="#cb26-96" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="dv">15</span>, <span class="dv">15</span>, <span class="dv">15</span>, <span class="dv">15</span>)</span>
-<span id="cb26-97"><a href="#cb26-97" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb26-98"><a href="#cb26-98" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb26-99"><a href="#cb26-99" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Airbnb Clustering Along the Red/Purple Line"</span>,</span>
-<span id="cb26-100"><a href="#cb26-100" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Transit-oriented displacement in Hollywood, Koreatown, and Downtown"</span>,</span>
-<span id="cb26-101"><a href="#cb26-101" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"Data: Inside Airbnb, LA Metro, ACS 2019-2023 | CRS: EPSG 32611"</span></span>
-<span id="cb26-102"><a href="#cb26-102" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb26-103"><a href="#cb26-103" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-104"><a href="#cb26-104" aria-hidden="true" tabindex="-1"></a><span class="co"># Create inset overview map</span></span>
-<span id="cb26-105"><a href="#cb26-105" aria-hidden="true" tabindex="-1"></a>inset_overview <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb26-106"><a href="#cb26-106" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> census_tracts_sf, <span class="at">fill =</span> <span class="st">"grey90"</span>, <span class="at">color =</span> <span class="st">"grey80"</span>, <span class="at">linewidth =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
-<span id="cb26-107"><a href="#cb26-107" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> red_purple_line_sf, <span class="at">color =</span> <span class="st">"#E31837"</span>, <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb26-108"><a href="#cb26-108" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> vulnerable_tracts_redpurple, <span class="at">fill =</span> <span class="st">"#E31837"</span>, <span class="at">alpha =</span> <span class="fl">0.3</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
-<span id="cb26-109"><a href="#cb26-109" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
-<span id="cb26-110"><a href="#cb26-110" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb26-111"><a href="#cb26-111" aria-hidden="true" tabindex="-1"></a>    <span class="at">panel.border =</span> <span class="fu">element_rect</span>(<span class="at">color =</span> <span class="st">"black"</span>, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">linewidth =</span> <span class="dv">1</span>),</span>
-<span id="cb26-112"><a href="#cb26-112" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"white"</span>, <span class="at">color =</span> <span class="cn">NA</span>)</span>
-<span id="cb26-113"><a href="#cb26-113" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb26-114"><a href="#cb26-114" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-115"><a href="#cb26-115" aria-hidden="true" tabindex="-1"></a><span class="co"># Print with inset (similar to your Figure 1 and 2 approach)</span></span>
-<span id="cb26-116"><a href="#cb26-116" aria-hidden="true" tabindex="-1"></a><span class="fu">grid.newpage</span>()</span>
-<span id="cb26-117"><a href="#cb26-117" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(fig8_main, <span class="at">vp =</span> <span class="fu">viewport</span>(<span class="at">x =</span> <span class="fl">0.5</span>, <span class="at">y =</span> <span class="fl">0.5</span>, <span class="at">width =</span> <span class="dv">1</span>, <span class="at">height =</span> <span class="dv">1</span>))</span>
-<span id="cb26-118"><a href="#cb26-118" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(inset_overview, <span class="at">vp =</span> <span class="fu">viewport</span>(<span class="at">x =</span> <span class="fl">0.15</span>, <span class="at">y =</span> <span class="fl">0.22</span>, <span class="at">width =</span> <span class="fl">0.25</span>, <span class="at">height =</span> <span class="fl">0.25</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -916,6 +236,23 @@ Geodetic CRS:  WGS 84</code></pre>
 </div>
 </div>
 </div>
+<section id="narrative-3" class="level2">
+<h2 class="anchored" data-anchor-id="narrative-3">Narrative</h2>
+<p>Figure 8 examines transit-oriented displacement by mapping Airbnb clusters along the Red/Purple line through Hollywood, Koreatown, and downtown. I chose this line because of its proximity to many major tourist attractions and because it appears to have a large number of Airbnb rentals within Figure 4. Around each station, I have added a 400m buffer, the size of which varies depending on the number of Airbnb listings within this radius. In Figure 8, there is a pronounced clustering along the red/purple transit corridor, with concentrations notably uneven across each station. The largest clusters are around Hollywood, Koreatown, and downtown LA, where there are 80-100+ listings within the 400m buffer. The northern and southern termini show considerably lower density, suggesting that people are less willing to use public transport to commute to tourist attractions downtown. The high Airbnb density within census tracts with 80% renter occupancy suggests significant displacement pressure. These areas represent communities of renters experiencing intensive short-term rental activity. Hollywood exhibits expected tourist-oriented displacement. Transit can amplify tourist attractions with greater connectivity (Anderson, 2014), creating a more convenient location, such as easy access to the airport and downtown. There is also a high level of foot traffic at Hollywood, Highland, and Vine stations. Koreatown, one of LA’s densest areas with nearly 90 to 100 rental occupancy rate in many tracts, despite being residential, shows heavy Airbnb clustering. Transit makes it accessible for tourism despite limited tourist infrastructure. This highlights how long-term rental units have been converted for tourist accommodation. Downtown, a major transport hub, benefits from mixed-use development and good connectivity, making it attractive for Airbnb. Transit-oriented displacement stems from the areas becoming more touristy and more viable for short-term rentals. Transit enables the spatial expansion of tourism beyond traditional hotspots to places like the Santa Monica Coast, making neighbourhoods more accessible and commercially viable. Transit-oriented development with publicly funded accessibility improvements has led to an unintended consequence. LA Metro and city planners should establish a cap to limit the number of short-term rental properties around metro stations, and collect revenue from permits. This revenue can be used to fund affordable housing development within transit corridors. These areas are high risk, and a rebalancing is needed to align the tourism economy with the priorities of local residents. Spatially targeted approaches are more effective than citywide bans. With a well-designed policy, transit investments can generate a community dividend for public infrastructure rather than enabling displacement (Chapple and Loukaitou-Sideris, 2019).</p>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>This analysis reveals Airbnb concentration patterns aligned with tourism infrastructure, transit accessibility, and renter-heavy neighbourhoods. The rent gap framework explains how these patterns drive displacement in areas such as Hollywood and Koreatown. Place-based policy supported by spatial data, rather than blanket restrictions, offers a more effective approach to balancing housing affordability with the tourism economy.</p>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="GY476-Assessment02_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
 </section>
 
 </main>
