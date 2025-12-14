@@ -86,10 +86,8 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 </section>
-</section>
-<section id="mean-airbnb-prices-by-census-tract" class="level1">
-<h1>Mean Airbnb Prices by Census Tract</h1>
-<p>[Your existing description text here]</p>
+<section id="mean-airbnb-prices-by-census-tract" class="level2">
+<h2 class="anchored" data-anchor-id="mean-airbnb-prices-by-census-tract">Mean Airbnb Prices by Census Tract</h2>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -103,6 +101,7 @@ ul.task-list li input[type="checkbox"] {
 <section id="narrative" class="level3">
 <h3 class="anchored" data-anchor-id="narrative">Narrative</h3>
 <p>Figure 1 shows higher concentration of entire homes and apartments in downtown Los Angeles compared to hotels, private rooms, and shared accommodations. High-value rentals mainly cluster in coastal areas like Santa Monica, Venice, and the affluent hills of Hollywood and Beverly Hills, which attract many tourists. Conversely, private and shared rooms are more evenly distributed, indicating that hosts are more likely to rent out spare rooms rather than entire properties. Typically, regions with high tourism demand show more rentals, while vacant zones suggest residential areas with short-term rental restrictions or limited urban development. In Figure 2, a clear premium exists for coastal regions, with many dark brown patches along the coastline (Malibu, Santa Monica) and in the northern hills. An east-west divide is visible, with the western side displaying many more dark areas than the more affordable eastern side. The highest prices are in the Santa Monica mountains and Malibu, likely reflecting luxury rentals, while the lowest are in densely populated urban areas. For the colour mapping, I used the natural breaks method to ensure minimal variance within classes and maximum variance between classes, which benefits unevenly distributed data. Removing outliers has made lower-cost differences more apparent, improving the map’s clarity and visual impact. The yellow-to-red palette intuitively associates red with higher prices. Using gold to highlight the top three most expensive and another colour for the bottom three enhances clarity. The high density of entire homes could pressure the long-term housing market.</p>
+</section>
 </section>
 </section>
 <section id="question-3-mapping-and-data-visualisation" class="level1">
@@ -141,7 +140,6 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="question-5-restaurant-density-analysis-with-osm" class="level1">
 <h1>Question 5: Restaurant Density Analysis with OSM</h1>
-<p>[Your existing description text here]</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -155,7 +153,6 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="proximity-analysis-airbnbs-near-restaurants" class="level1">
 <h1>Proximity Analysis: Airbnbs Near Restaurants</h1>
-<p>[Your existing description text here]</p>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -169,7 +166,7 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="narrative-3" class="level1">
 <h1>Narrative</h1>
-<p>[Your existing narrative text here]</p>
+<p>Figure 5 maps restaurant density across Los Angeles County using OpenStreetMap data. The number of restaurants correlates with the area’s popularity, often indicating higher rental and purchase prices. It represents tourism infrastructure and neighbourhood vibrancy, with density patterns revealing commercial centres, gentrification trends, and areas with higher disposable income. I applied kernel density estimation with a 3km bandwidth to identify hotspots. The main hotspots are located in downtown LA, with many other restaurants in areas such as West Hollywood and along the coast in Santa Monica, while peripheral residential zones show notable gaps. There is a strong correlation between Airbnb rentals and the number of restaurants. Highlighting the positive feedback loop of short-term rentals and the restaurant ecosystem, they share a mutually beneficial relationship. The high density of Airbnb listings results from the area’s amenity-rich character. Figure 6 shows Airbnb listings within a 200m radius of restaurants in the neighbourhood of Hollywood. I chose Hollywood for its amenities, high Airbnb density, and tourist appeal. I created a 200m buffer around each restaurant, roughly representing a comfortable walking distance to these amenities. Of the 1320 listings, 758 (57%) were within a 200m radius of 367 restaurants, with restaurant clustering attracting tourists along streets such as Sunset and Hollywood Boulevard, while outer residential streets offer fewer options. This concentration highlights Airbnb hosts strategically located near dining amenities and within popular tourist areas, showing the correlation between amenity-dense neighbourhoods like Hollywood and West LA, demonstrating that dining infrastructure contributes to rental premiums. These properties offer accommodation at a premium, reinforcing a tourism-oriented geography. This ‘consumer city’ framework explains how clustering can induce and prioritise the provision of consumption amenities (Glaeser et al., 2001). Restaurant presence and access to dining amenities and retail are often indicators of, and drivers of, gentrification, attracting tourism and displacing residential services (Lloyd, 2002; Zukin et al., 2009). The effect of increased tourism and consumption of amenities can often distract from attractiveness for residents wishing to buy and live, as exemplified by Notting Hill gentrification, where making it a tourist attraction has reduced its desirability for residents (Parker, 2025).</p>
 </section>
 <section id="part-b---option-1-point-pattern-analysis" class="level1">
 <h1>Part B - Option 1: Point Pattern Analysis</h1>
@@ -178,41 +175,35 @@ ul.task-list li input[type="checkbox"] {
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="GY476-Assessment02_files/figure-html/figure-7-8-combined-1.png" class="img-fluid figure-img" width="1152"></p>
+<p><img src="GY476-Assessment02_files/figure-html/figure-7-1.png" class="img-fluid figure-img" width="1152"></p>
 <figcaption><strong>Figure 7:</strong> Kernel density estimation using point pattern analysis (2km bandwidth).</figcaption>
 </figure>
 </div>
 </div>
 </div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Moran I test under randomisation
+
+data:  tracts_valid$mean_price  
+weights: lw    
+
+Moran I statistic standard deviate = 22.465, p-value &lt; 2.2e-16
+alternative hypothesis: greater
+sample estimates:
+Moran I statistic       Expectation          Variance 
+     0.2808257706     -0.0004415011      0.0001567623 </code></pre>
+</div>
+</div>
 </section>
 <section id="narrative-4" class="level1">
 <h1>Narrative</h1>
-<p>[Your existing narrative text here]</p>
+<p>Figure 7 uses kernel density estimation (KDE) to statistically identify Airbnb concentration hotspots. I used a 2 km bandwidth to balance local detail and regional patterns. This is crucial because it highlights areas at risk of displacement. Unlike dot or colour maps, KDE provides a continuous surface that enables examination of spatial relationships across borders or neighbourhoods. Downtown and Hollywood significantly surpass other Los Angeles areas, indicating that Airbnb rentals are mostly concentrated in tourist hotspots rather than being evenly spread, with a very high density in downtown. There are over 80 listings per km² in downtown Los Angeles and in secondary areas such as Santa Monica and Koreatown. Outside these zones, no prominent clusters are evident. Regions like San Fernando Valley and eastern suburbs show minimal activity. This likely stems from the walkability of downtown and Hollywood, which attracts higher tourist demand. This analysis also supports Wachsmuth and Weisler’s (2018) rent gap theory, with high-intensity zones aligning directly with hotspots identified in Figure 4, where a high percentage of renters and a low percentage of buyers are observed. Where high renter populations coincide with elevated Airbnb prices, there is displacement pressure on existing renters as landlords shift from long-term to short-term rentals. This is driven by clusters of amenities and cultural attractions that attract tourists, combined with walkable neighbourhoods, creating a self-reinforcing cycle of commercialisation global Moran’s I (I = 0.280,p&lt;0.001) confirms significant positive spatial correlation, validatating that airbnb price cluster rather than disributute randomly. New policies must be introduced to address this trend. I suggest that local authorities utilise kernel density analysis alongside renter occupancy rates to develop a vulnerability index that informs regulatory thresholds: areas with more than 50 listings per km² should be subject to permit freezes and a requirement to convert to long-term rentals. Zones with 20-50 listings should have growth caps to limit new permits, while those below 20 only need registration. This data-driven approach facilitates place-based decision-making, tackling the issue of declining housing stocks in communities while maintaining the tourism economy within suitable areas.</p>
 </section>
 <section id="figure-8-transit-oriented-displacement" class="level1">
 <h1>Figure 8: Transit Oriented Displacement</h1>
-<p>[Your existing description text here]</p>
 <div class="cell" data-layout-align="center">
-<div class="cell-output cell-output-stdout">
-<pre><code>Reading layer `802_805_Track_0316' from data source 
-  `/Users/dylanhillier/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/GY476_Geographic_Information_System/assessment02/data/red-purple-line/802_805_Track_0316.shp' 
-  using driver `ESRI Shapefile'
-Simple feature collection with 144 features and 2 fields
-Geometry type: MULTILINESTRING
-Dimension:     XY
-Bounding box:  xmin: 6447247 ymin: 1836011 xmax: 6492388 ymax: 1884772
-Projected CRS: NAD83(HARN) / California zone 5 (ftUS)</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Reading layer `RedPurpleLine0316' from data source 
-  `/Users/dylanhillier/Library/CloudStorage/OneDrive-LondonSchoolofEconomics/GY476_Geographic_Information_System/assessment02/data/red-purple-stations/RedPurpleLine0316.shp' 
-  using driver `ESRI Shapefile'
-Simple feature collection with 16 features and 13 fields
-Geometry type: POINT
-Dimension:     XY
-Bounding box:  xmin: -118.3768 ymin: 34.04863 xmax: -118.2342 ymax: 34.1685
-Geodetic CRS:  WGS 84</code></pre>
-</div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -224,11 +215,21 @@ Geodetic CRS:  WGS 84</code></pre>
 </div>
 <section id="narrative-5" class="level2">
 <h2 class="anchored" data-anchor-id="narrative-5">Narrative</h2>
-<p>[Your existing narrative text here]</p>
+<p>Figure 8 examines transit-oriented displacement by mapping Airbnb clusters along the Red/Purple line through Hollywood, Koreatown, and downtown. I chose this line because of its proximity to many major tourist attractions and because it appears to have a large number of Airbnb rentals within Figure 4. Around each station, I have added a 400m buffer, the size of which varies depending on the number of Airbnb listings within this radius. In Figure 8, there is a pronounced clustering along the red/purple transit corridor, with concentrations notably uneven across each station. The largest clusters are around Hollywood, Koreatown, and downtown LA, where there are 80-100+ listings within the 400m buffer. The northern and southern termini show considerably lower density, suggesting that people are less willing to use public transport to commute to tourist attractions downtown. The high Airbnb density within census tracts with 80% renter occupancy suggests significant displacement pressure. These areas represent communities of renters experiencing intensive short-term rental activity. Hollywood exhibits expected tourist-oriented displacement. Transit can amplify tourist attractions with greater connectivity (Anderson, 2014), creating a more convenient location, such as easy access to the airport and downtown. There is also a high level of foot traffic at Hollywood, Highland, and Vine stations. Koreatown, one of LA’s densest areas with nearly 90 to 100 rental occupancy rate in many tracts, despite being residential, shows heavy Airbnb clustering. Transit makes it accessible for tourism despite limited tourist infrastructure. This highlights how long-term rental units have been converted for tourist accommodation. Downtown, a major transport hub, benefits from mixed-use development and good connectivity, making it attractive for Airbnb. Transit-oriented displacement stems from the areas becoming more touristy and more viable for short-term rentals. Transit enables the spatial expansion of tourism beyond traditional hotspots to places like the Santa Monica Coast, making neighbourhoods more accessible and commercially viable. Transit-oriented development with publicly funded accessibility improvements has led to an unintended consequence. LA Metro and city planners should establish a cap to limit the number of short-term rental properties around metro stations, and collect revenue from permits. This revenue can be used to fund affordable housing development within transit corridors. These areas are high risk, and a rebalancing is needed to align the tourism economy with the priorities of local residents. Spatially targeted approaches are more effective than citywide bans. With a well-designed policy, transit investments can generate a community dividend for public infrastructure rather than enabling displacement (Chapple and Loukaitou-Sideris, 2019).</p>
 </section>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
-<p>[Your existing conclusion text here]</p>
+<p>This analysis uncovers Airbnb concentration patterns related to tourism infrastructure, transit accessibility, and neighbourhoods with many renters. The rent gap framework illustrates how these patterns drive displacement in areas such as Hollywood and Koreatown. Place-based policies supported by spatial data, rather than broad restrictions, provide a more effective way to balance housing affordability with the tourism industry. We found that Moran’s I statistically confirmed strong spatial clustering, while bivariate mapping highlighted increasing displacement hotspots, tourism zones, and valuable areas, as well as rising displacement pressure along transit corridors. New policies must be place-based and supported by spatial data to balance housing affordability and tourism.</p>
+<p>Reference list Bohn, S. and Thorman, T. (2025). Income Inequality in California. [online] Available at: https://www.ppic.org/wp-content/uploads/income-inequality-in-california.pdf [Accessed 25 Nov.&nbsp;2025].</p>
+<p>Chapple, K. and Loukaitou-Sideris, A. (2019). Transit-oriented displacement or community dividends? : understanding the effects of smarter growth on communities. Cambridge, Massachusetts: The Mit Press.</p>
+<p>Gurran, N. and Phibbs, P. (2017). When Tourists Move In: How Should Urban Planners Respond to Airbnb? Journal of the American Planning Association, 83(1), pp.80–92. doi:https://doi.org/10.1080/01944363.2016.1249011.</p>
+<p>Horn, K. and Merante, M. (2017). Is home sharing driving up rents? Evidence from Airbnb in Boston. Journal of Housing Economics, 38, pp.14–24. doi:https://doi.org/10.1016/j.jhe.2017.08.002.</p>
+<p>Lloyd, R. (2002). Neo–Bohemia: Art and Neighborhood Redevelopment in Chicago. Journal of Urban Affairs, 24(5), pp.517–532. doi:https://doi.org/10.1111/1467-9906.00141.</p>
+<p>Nowell, C. (2025). Homelessness in Los Angeles County Declines for Second Straight Year. [online] the Guardian. Available at: https://www.theguardian.com/us-news/2025/jul/14/los-angeles-county-homelessness-report [Accessed 26 Nov.&nbsp;2025].</p>
+<p>Parker, C. (2025). The Notting Hill neighbours divided over tourists flocking to their Instagrammable homes. [online] yahoo news. Available at: https://uk.news.yahoo.com/notting-hill-colour-houses-london-value-tourists-181112817.html?guccounter=1&amp;guce_referrer=aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS8&amp;guce_referrer_sig=AQAAAFcdBoR0a_4ZGRzwD32YMiQgB6Lp__IhlX2CH0EXR30nsT1mMwEFASWteeymZXNEs8R_QBoh_gcGtXLMBiZcUAQ7eVT396sDMDcDJXTi7SgKFk1pf_kwz9TWIpMmCEKUtJzDZMzLyrRxcSvyDv5aYWmVhJiD3F2Bx56iWHyWKO88 [Accessed 13 Dec.&nbsp;2025].</p>
+<p>The Economist (2025). California Tries to Fix Its Housing Mess. [online] The Economist. Available at: https://www.economist.com/united-states/2025/10/14/california-tries-to-fix-its-housing-mess [Accessed 26 Nov.&nbsp;2025].</p>
+<p>Wachsmuth, D. and Weisler, A. (2018). Airbnb and the Rent gap: Gentrification through the Sharing Economy. Environment and Planning A: Economy and Space, 50(6), pp.1147–1170.</p>
+<p>Zukin, S., Trujillo, V., Frase, P., Jackson, D., Recuber, T. and Walker, A. (2009). New Retail Capital and Neighborhood Change: Boutiques and Gentrification in New York City. City &amp; Community, 8(1), pp.47–64. doi:https://doi.org/10.1111/j.1540-6040.2009.01269.x.</p>
 </section>
 </section>
 
