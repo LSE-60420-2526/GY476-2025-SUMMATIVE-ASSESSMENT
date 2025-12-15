@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>GY476 2025 SUMMATIVE ASSESSMENT</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="GY476-Assessment02_files/libs/clipboard/clipboard.min.js"></script>
+<script src="GY476-Assessment02_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="GY476-Assessment02_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="GY476-Assessment02_files/libs/quarto-html/popper.min.js"></script>
+<script src="GY476-Assessment02_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="GY476-Assessment02_files/libs/quarto-html/anchor.min.js"></script>
+<link href="GY476-Assessment02_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="GY476-Assessment02_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="GY476-Assessment02_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="GY476-Assessment02_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="GY476-Assessment02_files/libs/bootstrap/bootstrap-81267100e462c21b3d6c0d5bf76a3417.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">GY476 2025 SUMMATIVE ASSESSMENT</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>This report examines Los Angeles(LA) through two datasets: Airbnb listings and the American Community Survey (ACS). As a popular tourist destination, LA experiences high demand for short-term rentals, which reduces the supply of houses on the market, creating a ‘rental gap’ where short-term rentals are more profitable than long-term ones, thereby inducing gentrification and pricing out locals (Wachsmuth and Weisler, 2018). Data compiled from Airbnb’s website includes listing information alongside other variables such as price. The ACS captures poverty rates, socioeconomic disparities, and wealth inequality, offering insights into LA’s high levels of inequality (Bohn and Thorman, 2025). This spatial analysis examines the distribution of Airbnb listings and their relationship to key socioeconomic variables through a rent gap lens, informing policy decisions aimed at addressing the housing crisis in LA and alleviating homelessness (Nowell, 2025; The Economist, 2025).</p>
+</section>
+<section id="section-a" class="level1">
+<h1>Section A</h1>
+<section id="question-1" class="level2">
+<h2 class="anchored" data-anchor-id="question-1">Question 1</h2>
+<p>Airbnb data is publicly available, collected via web scraping, providing a snapshot (specifically for September in Los Angeles) of Airbnb listings and prices. The use of point-level geographic coordinates allows for spatial plotting alongside details like price, room type, availability, and reviews. It covers LA metro and Catalina Island. It also lacks key details such as actual booking prices (since it shows listed prices), fees or discounts, and private or unlisted properties. Additionally, it offers only a snapshot in time, neglecting seasonal variations common in Los Angeles. Since data is reported by hosts, there is a risk of unreliability or false information. The American Community Survey (ACS) data, provides 5-year estimates (2019-2023) across various factors. Offering official goverment statistics detailed demographic, economic, and housing data, including a margin of error indicating uncertainty. It does have limitations. 5-year averages can reduce reliability for current conditions. Since the data are aggregated at the tract level, we cannot observe smaller subdivisions, meaning tract averages do not reflect individual circumstances within each tract. Furthermore, as it is self-reported, it may include biases or inaccuracies from respondents.</p>
+<p>Listings with prices outside 1.5 × IQR from the quartiles were removed as outliers because they could misrepresent certain areas. Extremely high prices on rare luxury properties might not be typical of an area, potentially distorting visualisations and statistical summaries, and failing to accurately reflect the usual Airbnb markets. Finally, regarding the coordinate reference system (CRS), I have chosen UTM Zone 11N (EPSG:32611), since it uses metres, making measurements easier, covers all of Los Angeles with minimal distortion, and is well-suited for distance and area calculations. It is also commonly used in academic research. The reason WGS84 wasn’t used was because it is in degrees, which is less accurate for measuring distance.</p>
+</section>
+<section id="question-2-spatial-distribution-of-airbnb-listings" class="level2">
+<h2 class="anchored" data-anchor-id="question-2-spatial-distribution-of-airbnb-listings">Question 2: Spatial Distribution of Airbnb Listings</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="GY476-Assessment02_files/figure-html/figure-1-1.png" class="img-fluid figure-img" width="1344"></p>
+<figcaption><strong>Figure 1:</strong> Spatial distribution of Airbnb listings in Los Angeles County by room type.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="GY476-Assessment02_files/figure-html/figure-2-1.png" class="img-fluid figure-img" width="1152"></p>
+<figcaption><strong>Figure 2:</strong> Mean Airbnb prices by census tract.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="narrative" class="level3">
+<h3 class="anchored" data-anchor-id="narrative">Narrative</h3>
+<p>Figure 1 shows higher concentration of entire homes and apartments in downtown Los Angeles compared to hotels, private rooms, and shared accommodations. High-value rentals cluster in coastal areas like Santa Monica, Venice, and the hills of Hollywood and Beverly Hills. Conversely, private and shared rooms are more evenly distributed, indicating that hosts are more likely to rent out spare rooms rather than entire properties. Typically, regions with high tourism demand show more rentals, while vacant zones suggest residential areas with short-term rental restrictions or limited urban development. In Figure 2, a clear premium exists for coastal regions, with many dark brown patches along the coastline (Malibu, Santa Monica) and in the northern hills. An east-west divide is visible, with the western side displaying many more dark areas than the more affordable eastern side. The highest prices are in the Santa Monica mountains and Malibu, likely reflecting luxury rentals, while the lowest are in densely populated urban areas. For the colour mapping, I used the natural breaks method to ensure minimal variance within classes and maximum variance between classes, which benefits unevenly distributed data. Removing outliers revealing lower-cost differences. The yellow-to-red palette intuitively associates red with higher prices. Using gold to highlight the top three most expensive and red for the bottom three. The clustering of high density of entire homes could pressure the long-term housing market.</p>
+</section>
+</section>
+<section id="question-3-mapping-and-data-visualisation" class="level2">
+<h2 class="anchored" data-anchor-id="question-3-mapping-and-data-visualisation">Question 3: Mapping and Data Visualisation</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="GY476-Assessment02_files/figure-html/figure-3-1.png" class="img-fluid figure-img" width="1344"></p>
+<figcaption><strong>Figure 3:</strong> Socio-economic characteristics of Los Angeles County census tracts.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="narrative-1" class="level3">
+<h3 class="anchored" data-anchor-id="narrative-1">Narrative</h3>
+<p>Following Wachsmuth and Weisler’s (2018) rent gap framework, I chose the percentage of renter-occupied units and median household income as key socioeconomic indicators. Renter occupancy data was collected directly from ACS(2019-2023) from tidycensus variable(B25003), while median household income was sourced from the census_data file. Renter occupancy was calculated as the percentage of renter-occupied housing units relative to total occupied housing units for each census tract collected from tidycensus. This indicates areas vulnerable to rental conversion and relates to income patterns shaping Airbnb’s spatial distribution. Together, these indicators highlight the dynamics of gentrification and the role of tourism economies in driving market expansion. The gap between actual rent (capitalised) and the unrealised potential of short-term rentals is a crucial factor accelerating gentrification and displacing low-income residents. Using income helps to distinguish tourist-serving areas from residential zones. These demonstrate the relationship between rental rates and income. This can be observed on the map, showing high renter occupancy in central/downtown LA, while it is lower in the suburbs. There is a clear inverse relationship between areas such as high-income wealth corridors like Malibu, Santa Monica, San Fernando, and Hollywood, contrasted with lower-income neighbourhoods such as Huntington Park and Compton. This inverse relationship between wealth and renting leaves LA’s low-income residents vulnerable, with housing loss in some areas and tourism concentration in others. The YLOrRD (yellow-orange-red) scheme for renter occupancy and GNBu for income were selected for their association with intensity and monetary values respectively, with the legends being positioned horizontally to allow space for the map while remaining colour-blind accessible. A continuous colour scale was employed to preserve the full variance in the data, avoiding any information loss or skew that might obscure neighbourhood-level variance.</p>
+</section>
+</section>
+<section id="question-4-bivariate-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="question-4-bivariate-analysis">Question 4: Bivariate Analysis</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="GY476-Assessment02_files/figure-html/figure-4-1.png" class="img-fluid figure-img" width="960"></p>
+<figcaption><strong>Figure 4:</strong> Bivariate choropleth map examining the relationship between Airbnb prices and renter occupancy.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="narrative-2" class="level3">
+<h3 class="anchored" data-anchor-id="narrative-2">Narrative</h3>
+<p>Figure 4 displays the natural logarithm of house prices alongside the percentage of renters across Los Angeles County. Using the natural log enables us to model nonlinear relationships linearly, aiding in normalising skewed data. The map shows both variables simultaneously, revealing spatial patterns and helping us determine whether high Airbnb prices correspond with areas of high renter populations. This informs whether Airbnb exploitation occurs in rental markets or mainly serves wealthy tourist zones. The map combines log-transformated Airbnb price with renter data from the ACS, using a purple–gold colour scheme—purple for high renters/low prices, yellow/gold for low renters/high prices, dark gold for high renters/high prices, and light purple for low on both. Dark gold areas indicate displacement hotspots, where rents are driven by short-term tourism rentals rather than residents. This suggests landlords profit from short-term rentals, and the property market mainly targets asset holding rather than residential use—highlighting the rent gap phenomenon. Koreantown emerges as a key displacement hotspot, situated near Hollywood, downtown LA, Dodger Stadium, and the airport, with easy transit access. Areas in the pure gold zone (high prices, low rent), such as Brentwood, are likely second-home investments serving affluent tourists, with low displacement risk due to fewer rental residents. Conversely, areas with many renters and low prices could become future short-term rental hotspots. Horn and Merante (2017) found that a 1% increase in Airbnb rentals can raise asking rents by 0.4%, illustrating how Airbnb can amplify neighbourhood rent levels and reduce long-term housing supply. Addressing high rental populations and elevated Airbnb prices requires targeted regulation to prevent houses from being purchased solely as assets, thereby releasing some homes for residents, lowering prices, and improving affordability (Gurran and Phibbs, 2017). The analysis highlights distinct Airbnb geographies: gentrification zones where high prices intersect with rental-heavy neighbourhoods (Hollywood, West LA), pure tourism zones catering to wealthy visitors (coastal corridor). This inverse spatial pattern echoes Figure 3, demonstrating how economic inequality influences Airbnb’s distribution.</p>
+</section>
+</section>
+<section id="question-5-restaurant-density-analysis-with-osm" class="level2">
+<h2 class="anchored" data-anchor-id="question-5-restaurant-density-analysis-with-osm">Question 5: Restaurant Density Analysis with OSM</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="GY476-Assessment02_files/figure-html/figure-5-1.png" class="img-fluid figure-img" width="960"></p>
+<figcaption><strong>Figure 5:</strong> Kernel density estimation of restaurant locations.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="proximity-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="proximity-analysis">Proximity Analysis</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="GY476-Assessment02_files/figure-html/figure-6-1.png" class="img-fluid figure-img" width="960"></p>
+<figcaption><strong>Figure 6:</strong> Proximity analysis showing Airbnb listings within 200m of restaurants in Hollywood.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="narrative-3" class="level3">
+<h3 class="anchored" data-anchor-id="narrative-3">Narrative</h3>
+<p>Figure 5 maps restaurant density across Los Angeles County using OpenStreetMap data. Restaurant density indicates area popularity and property values. It represents tourism infrastructure and neighbourhood vibrancy, with density patterns revealing commercial centres, gentrification trends, and areas with higher disposable income. I applied kernel density estimation with a 3km bandwidth to identify hotspots. The main hotspots are located in downtown LA, with many other restaurants in areas such as West Hollywood and along the coast in Santa Monica, while peripheral residential zones show notable gaps. There is a strong correlation between Airbnb rentals and the number of restaurants. Highlighting the positive feedback loop of short-term rentals and the restaurant ecosystem, they share a mutually beneficial relationship. The high density of Airbnb listings results from the area’s amenity-rich character. Figure 6 shows Airbnb listings within a 200m radius of restaurants in the neighbourhood of Hollywood. I chose Hollywood for its amenities, high Airbnb density, and tourist appeal. I created a 200m buffer around each restaurant, roughly representing a comfortable walking distance to these amenities. Of the 1320 listings, 758 (57%) were within a 200m radius of 367 restaurants, with restaurant clustering attracting tourists along streets such as Sunset and Hollywood Boulevard, while outer residential streets offer fewer options. This concentration highlights Airbnb hosts strategically located near dining amenities and within popular tourist areas, showing the correlation between amenity-dense neighbourhoods like Hollywood and West LA, demonstrating that dining infrastructure contributes to rental premiums. These properties offer accommodation at a premium, reinforcing a tourism-oriented geography. This ‘consumer city’ framework explains how clustering can induce and prioritise the provision of consumption amenities (Glaeser et al., 2001). Restaurant presence and access to dining amenities and retail are often indicators of, and drivers of, gentrification, attracting tourism and displacing residential services (Lloyd, 2002; Zukin et al., 2009). The effect of increased tourism and consumption of amenities can often distract from attractiveness for residents wishing to buy and live, as exemplified by Notting Hill gentrification, where making it a tourist attraction has reduced its desirability for residents (Parker, 2025).</p>
+</section>
+</section>
+<section id="part-b---option-1-point-pattern-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="part-b---option-1-point-pattern-analysis">Part B - Option 1: Point Pattern Analysis</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="GY476-Assessment02_files/figure-html/figure-7-1.png" class="img-fluid figure-img" width="1152"></p>
+<figcaption><strong>Figure 7:</strong> Kernel density estimation using point pattern analysis (2km bandwidth).</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Moran I test under randomisation
+
+data:  tracts_valid$mean_price  
+weights: lw    
+
+Moran I statistic standard deviate = 22.465, p-value &lt; 2.2e-16
+alternative hypothesis: greater
+sample estimates:
+Moran I statistic       Expectation          Variance 
+     0.2808257706     -0.0004415011      0.0001567623 </code></pre>
+</div>
+</div>
+<section id="narrative-4" class="level3">
+<h3 class="anchored" data-anchor-id="narrative-4">Narrative</h3>
+<p>Figure 7 uses kernel density estimation (KDE) to statistically identify Airbnb concentration hotspots. I used a 2 km bandwidth to balance local detail and regional patterns. This is crucial because it highlights areas at risk of displacement. Downtown and Hollywood significantly surpass other Los Angeles areas, indicating that Airbnb rentals are mostly concentrated in tourist hotspots rather than being evenly spread, with a very high density in downtown. There are over 80 listings per km² in downtown Los Angeles and in secondary areas such as Santa Monica and Koreatown. Outside these zones, no prominent clusters are evident. Regions like San Fernando Valley and eastern suburbs show minimal activity. This likely stems from the walkability of downtown and Hollywood, which attracts higher tourist demand. This analysis also supports Wachsmuth and Weisler’s (2018) rent gap theory, with high-intensity zones aligning directly with hotspots identified in Figure 4, where a high percentage of renters and a low percentage of buyers are observed. Where high renter populations coincide with elevated Airbnb prices, there is displacement pressure on existing renters as landlords shift from long-term to short-term rentals. This is driven by clusters of amenities and cultural attractions that attract tourists, combined with walkable neighbourhoods, creating a self-reinforcing cycle of commercialisation. Global Moran’s I (I = 0.280,p&lt;0.001) confirms significant positive spatial correlation, validatating that airbnb price cluster rather than disributute randomly. New policies must be introduced to address this trend. I suggest that local authorities utilise kernel density analysis alongside renter occupancy rates to develop a vulnerability index that informs regulatory thresholds: areas with more than 50 listings per km² should be subject to permit freezes and a requirement to convert to long-term rentals. Zones with 20-50 listings should have growth caps to limit new permits, while those below 20 only need registration. This data-driven approach facilitates place-based decision-making, tackling the issue of declining housing stocks in communities while maintaining the tourism economy within suitable areas.</p>
+</section>
+</section>
+<section id="part-c-option-2-transit-oriented-displacement" class="level2">
+<h2 class="anchored" data-anchor-id="part-c-option-2-transit-oriented-displacement">Part C: Option 2 Transit-Oriented Displacement</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="GY476-Assessment02_files/figure-html/figure-8-1.png" class="img-fluid figure-img" width="1152"></p>
+<figcaption><strong>Figure 8:</strong> Airbnb clustering along the Red/Purple Line.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="narrative-5" class="level3">
+<h3 class="anchored" data-anchor-id="narrative-5">Narrative</h3>
+<p>Figure 8 examines transit-oriented displacement by mapping Airbnb clusters along the Red/Purple line through Hollywood, Koreatown, and downtown. I chose this line because of its proximity to many major tourist attractions and because it appears to have a large number of Airbnb rentals within Figure 4. Around each station, I have added a 400m buffer, the size of which varies depending on the number of Airbnb listings within this radius. In Figure 8, there is a pronounced clustering along the red/purple transit corridor, with concentrations notably uneven across each station. The largest clusters are around Hollywood, Koreatown, and downtown LA, where there are 80-100+ listings within the 400m buffer. Northan and southern termini show lower density suggesting limited tourst use. The high Airbnb density within census tracts with 80% renter occupancy suggests significant displacement pressure. These areas represent communities of renters experiencing intensive short-term rental activity. Hollywood exhibits expected tourist-oriented displacement. Transit connectivity can make neighbourhoods more accessible(Anderson, 2014; Chapple, Loukaitou-Sideris and Gonzalez, 2018), creating a more convenient location for tourist, such as easy access to the airport and downtown. There is also a high level of foot traffic at Hollywood, Highland, and Vine stations. Koreatown, one of LA’s densest areas with nearly 90 to 100 rental occupancy rate in many tracts, despite being residential, shows heavy Airbnb clustering. Transit makes it accessible for tourism despite limited tourist infrastructure. This highlights how long-term rental units have been converted for tourist accommodation. Downtown, a major transport hub, benefits from mixed-use development and good connectivity, making it attractive for Airbnb. Transit-oriented displacement stems from the areas becoming more touristy and more viable for short-term rentals. Transit enables the spatial expansion of tourism beyond traditional hotspots to places like the Santa Monica Coast, making neighbourhoods more accessible and commercially viable. Transit-oriented development with publicly funded accessibility improvements has led to an unintended consequence. LA Metro and city planners should establish a cap to limit the number of short-term rental properties around metro stations, and collect revenue from permits. This revenue can be used to fund affordable housing development within transit corridors. These areas are high risk, and a rebalancing is needed to align the tourism economy with the priorities of local residents. Spatially targeted approaches are more effective than citywide bans. With a well-designed policy, transit investments can generate a community dividend for public infrastructure rather than enabling displacement (Chapple and Loukaitou-Sideris, 2019).</p>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>This analysis uncovers Airbnb concentration patterns related to tourism infrastructure, transit accessibility, and neighbourhoods with many renters. The rent gap framework illustrates how these patterns drive displacement in areas such as Hollywood and Koreatown. Place-based policies supported by spatial data, rather than broad restrictions, provide a more effective way to balance housing affordability with the tourism industry. We found that Moran’s I statistically confirmed strong spatial clustering, while bivariate mapping highlighted increasing displacement hotspots, tourism zones, and valuable areas, as well as rising displacement pressure along transit corridors.</p>
+<section id="reference-list" class="level3">
+<h3 class="anchored" data-anchor-id="reference-list">Reference list</h3>
+<p>Anderson, M.L. (2014). Subways, Strikes, and Slowdowns: The Impacts of Public Transit on Traffic Congestion. American Economic Review, 104(9), pp.2763–2796. doi:https://doi.org/10.1257/aer.104.9.2763.</p>
+<p>Bohn, S. and Thorman, T. (2025). Income Inequality in California. [online] Available at: https://www.ppic.org/wp-content/uploads/income-inequality-in-california.pdf [Accessed 25 Nov.&nbsp;2025].</p>
+<p>Chapple, K. and Loukaitou-Sideris, A. (2019). Transit-oriented displacement or community dividends? : understanding the effects of smarter growth on communities. Cambridge, Massachusetts: The Mit Press.</p>
+<p>Chapple, K., Loukaitou-Sideris, A. and Gonzalez, S. (2018). Transit Oriented Development and Commercial Gentrification: Exploring the Linkages.</p>
+<p>Gurran, N. and Phibbs, P. (2017). When Tourists Move In: How Should Urban Planners Respond to Airbnb? Journal of the American Planning Association, 83(1), pp.80–92. doi:https://doi.org/10.1080/01944363.2016.1249011.</p>
+<p>Horn, K. and Merante, M. (2017). Is home sharing driving up rents? Evidence from Airbnb in Boston. Journal of Housing Economics, 38, pp.14–24. doi:https://doi.org/10.1016/j.jhe.2017.08.002.</p>
+<p>Lloyd, R. (2002). Neo–Bohemia: Art and Neighborhood Redevelopment in Chicago. Journal of Urban Affairs, 24(5), pp.517–532. doi:https://doi.org/10.1111/1467-9906.00141.</p>
+<p>Nowell, C. (2025). Homelessness in Los Angeles County Declines for Second Straight Year. [online] the Guardian. Available at: https://www.theguardian.com/us-news/2025/jul/14/los-angeles-county-homelessness-report [Accessed 26 Nov.&nbsp;2025].</p>
+<p>Parker, C. (2025). The Notting Hill neighbours divided over tourists flocking to their Instagrammable homes. [online] yahoo news. Available at: https://uk.news.yahoo.com/notting-hill-colour-houses-london-value-tourists-181112817.html?guccounter=1&amp;guce_referrer=aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS8&amp;guce_referrer_sig=AQAAAFcdBoR0a_4ZGRzwD32YMiQgB6Lp__IhlX2CH0EXR30nsT1mMwEFASWteeymZXNEs8R_QBoh_gcGtXLMBiZcUAQ7eVT396sDMDcDJXTi7SgKFk1pf_kwz 9TWIpMmCEKUtJzDZMzLyrRxcSvyDv5aYWmVhJiD3F2Bx56iWHyWKO88 [Accessed 13 Dec.&nbsp;2025].</p>
+<p>The Economist (2025). California Tries to Fix Its Housing Mess. [online] The Economist. Available at: https://www.economist.com/united-states/2025/10/14/california-tries-to-fix-its-housing-mess [Accessed 26 Nov.&nbsp;2025].</p>
+<p>Wachsmuth, D. and Weisler, A. (2018). Airbnb and the Rent gap: Gentrification through the Sharing Economy. Environment and Planning A: Economy and Space, 50(6), pp.1147–1170.</p>
+<p>Zukin, S., Trujillo, V., Frase, P., Jackson, D., Recuber, T. and Walker, A. (2009). New Retail Capital and Neighborhood Change: Boutiques and Gentrification in New York City. City &amp; Community, 8(1), pp.47–64. doi:https://doi.org/10.1111/j.1540-6040.2009.01269.x.</p>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
